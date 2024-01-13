@@ -1,19 +1,5 @@
 [TOC]
 
-# 修改idea配置文件所在目录
-
-修改idea安装目录下的idea.properties文件，防止系统重装时配置文件在C盘被删除。
-
-如修改 E:\idea\bin\idea.properties
-
-```properties
-idea.install.path=E:/idea
-idea.config.path=${idea.install.path}/.IntelliJIdea/config
-idea.system.path=${idea.install.path}/.IntelliJIdea/system
-idea.plugins.path=${idea.config.path}/plugins
-idea.log.path=${idea.system.path}/log
-```
-
 # 配置jdk
 
 ![2020-07-19_231043](img/2020-07-19_231043.png)
@@ -111,6 +97,14 @@ idea.log.path=${idea.system.path}/log
 
 ![2020-07-31_094418](img/2020-07-31_094418.png)
 
+# 设置调用了标记为`@Deprecated`启用的API显示删除线
+
+![20240113_134610.png](img/20240113_134610.png)
+
+# 未使用过的方法和变量设置弱警告
+
+![20240113_141216.png](img/20240113_141216.png)
+
 # 修改jsp默认生成的样式
 
 ![2020-07-31_114336](img/2020-07-31_114336.png)
@@ -148,19 +142,37 @@ idea.log.path=${idea.system.path}/log
 # 配置SSH
 ![](img/20220706_205445.png)
 
-# 隐藏目录中为文件或目录
+# 隐藏项目导航中的文件或目录
 
 ![20210726_003246](img/20210726_003246.png)
 
-# 内存占用显示
+# 状态栏内存占用显示
 
 双击Shift搜索`show memory indicator`
 
 ![2021-12-23_092846](img/2021-12-23_092846.png)
 
+或者在下面状态栏选中`Memory Indicator`
+
+![20240113_134921.png](img/20240113_134921.png)
+
 # 取消嵌入提示
 
 ![](img/2022-09-28_155301.png)
+
+# ~~修改idea配置文件所在目录~~
+
+修改idea安装目录下的idea.properties文件，防止系统重装时配置文件在C盘被删除。
+
+如修改 E:\idea\bin\idea.properties
+
+```properties
+idea.install.path=E:/idea
+idea.config.path=${idea.install.path}/.IntelliJIdea/config
+idea.system.path=${idea.install.path}/.IntelliJIdea/system
+idea.plugins.path=${idea.config.path}/plugins
+idea.log.path=${idea.system.path}/log
+```
 
 # 插件
 
