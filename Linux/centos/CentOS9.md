@@ -1,9 +1,9 @@
 # CentOS9安装后配置
 
-# 网络管理工具
+# 安装一些必要的工具
 ```bash
 # 网络管理工具
-dnf install net-tools vim yum-utils -y
+dnf install net-tools git vim yum-utils -y
 ```
 
 # 设置语系
@@ -19,6 +19,7 @@ LANG=en_US.utf8
 export LC_ALL=en_US.utf8
 ```
 > 系统永久生效可以修改`/etc/locale.conf`文件
+> 不知道为什么了我设置了英文，时间都不对了，最后我还是设为了`zh_CN.utf8`
 
 ## 更新系统
 ```bash
@@ -34,3 +35,4 @@ dnf clean all
 ```bash
 package-cleanup --oldkernels --count=1
 ```
+
