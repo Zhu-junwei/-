@@ -319,3 +319,20 @@ yum check-update
 ```bash
 yum provides file_path
 ```
+
+# curl
+
+显示html信息
+```bash
+curl www.baidu.com
+```
+
+显示请求返回的头部信息
+```bash
+curl -I www.baidu.com
+```
+
+请求的时候加上Referer头部信息
+```bash
+curl -e www.google.com -I www.baidu.com
+```
