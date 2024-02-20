@@ -167,6 +167,41 @@ server {
 }
 ```
 
+
+如果确认设置的没有问题，但是访问服务的时候报错502，可能需要关闭SELinux
+
+查看 SELinux 状态：
+```bash
+sestatus
+```
+如果 SELinux 处于启用状态，您将看到类似以下的输出：
+```bash
+SELinux status:                 enabled
+```
+
+临时关闭 SELinux：
+
+如果您想临时禁用 SELinux 以进行测试，可以运行以下命令：
+```bash
+setenforce 0
+```
+这会将 SELinux 模式设置为 Permissive 模式，允许所有操作，但会记录违规操作。这样做可以帮助您确定是否 SELinux 是问题的根源。
+
+**永久关闭 SELinux（可选）：**
+
+如果您确定 SELinux 不再需要，可以永久关闭它。要这样做，您需要编辑 
+`/etc/selinux/config` 文件并将 `SELINUX` 设置为 `disabled`。打开文件：
+```bash
+vim /etc/selinux/config
+```
+找到 `SELINUX` 行并将其设置为 `disabled`：
+
+```bash
+SELINUX=disabled
+```
+保存并关闭文件。然后重新启动系统以使更改生效。
+
+
 # 负载均衡到多台主机
 
 `/etc/nginx/nginx.conf`定义需要负载均衡的机器
@@ -364,6 +399,9 @@ firewall-cmd --reload
 firewall-cmd --permanent --remove-rich-rule="rule family="ipv4" source address="192.168.234.101" port protocol="tcp" port="8080" accept"
 # 关闭防火墙
 systemctl stop firewalld
+
+# 查看设置的防火墙规则
+firewall-cmd --list-all --zone=public
 ```
 
 # 防盗链
@@ -674,7 +712,7 @@ virtual_server 10.10.10.3 1358 {
 
 ## 使用keepalived
 
-100和101主机分别安装keepalived。
+101和102主机分别安装keepalived。
 
 ![](./img/nginx-keepalived高可用.drawio.png)
 
@@ -689,6 +727,13 @@ virtual_server 10.10.10.3 1358 {
 
 global_defs {
    router_id LVS_101
+}
+
+# 定义健康检查脚本
+vrrp_script check_nginx_health {
+    script "/etc/keepalived/check_nginx_health.sh"  # 检查nginx是否存活以及重启nginx
+    interval 2                                      # 检查间隔，单位为秒
+    weight 2                                        # 权重，用于决定节点状态
 }
 
 vrrp_instance VI_1 {
@@ -709,13 +754,6 @@ vrrp_instance VI_1 {
         check_nginx_health  # 使用下面定义的健康检查脚本
     }
 }
-
-# 定义健康检查脚本
-vrrp_script check_nginx_health {
-    script "/etc/keepalived/check_nginx_health.sh"  # 检查nginx是否存活以及重启nginx
-    interval 2                                      # 检查间隔，单位为秒
-    weight 2                                        # 权重，用于决定节点状态
-}
 ```
 
 check_nginx_health.sh
@@ -726,15 +764,39 @@ chmod +x check_nginx_health.sh
 
 ```bash
 #!/bin/bash
-counter=$(ps -C nginx --no-heading | wc -l)
-if [ "${counter}" = "0" ]; then
-    nginx   # 启动nginx
-    sleep 2 # 2s后再次检查
+
+log_file="/var/log/nginx_health_check.log"
+max_retries=3
+retry_interval=5
+
+check_nginx() {
     counter=$(ps -C nginx --no-heading | wc -l)
-    if [ "${counter}" = "0" ]; then
-        systemctl stop keepalived
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - Nginx process count: $counter" >> "$log_file"
+    if [ "$counter" -eq "0" ]; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S') - Nginx is not running. Trying to start Nginx..." >> "$log_file"
+        systemctl start nginx
+        sleep "$retry_interval"
+        # Check if Nginx started successfully
+        counter=$(ps -C nginx --no-heading | wc -l)
+        echo "$(date +'%Y-%m-%d %H:%M:%S') - After start attempt, Nginx process count: $counter" >> "$log_file"
+        if [ "$counter" -eq "0" ]; then
+            echo "$(date +'%Y-%m-%d %H:%M:%S') - Failed to start Nginx. Stopping Keepalived." >> "$log_file"
+            systemctl stop keepalived
+        fi
     fi
-fi
+}
+
+# Main loop
+for ((i=1; i<=max_retries; i++)); do
+    check_nginx
+    # If Nginx is running, exit the loop
+    counter=$(ps -C nginx --no-heading | wc -l)
+    if [ "$counter" -ne "0" ]; then
+        break
+    fi
+    sleep "$retry_interval"
+done
+
 ```
 
 102主机keepalived配置
@@ -745,6 +807,13 @@ fi
 
 global_defs {
    router_id LVS_102
+}
+
+# 定义健康检查脚本
+vrrp_script check_nginx_health {
+    script "/etc/keepalived/check_nginx_health.sh"  # 检查nginx是否存活以及重启nginx
+    interval 2                                      # 检查间隔，单位为秒
+    weight 2                                        # 权重，用于决定节点状态
 }
 
 vrrp_instance VI_1 {
@@ -759,19 +828,35 @@ vrrp_instance VI_1 {
     }
     virtual_ipaddress {
         192.168.234.80
-    }
-    
+    }    
     track_script {
         check_nginx_health  # 使用下面定义的健康检查脚本
     }
 }
+```
 
-# 定义健康检查脚本
-vrrp_script check_nginx_health {
-    script "/etc/keepalived/check_nginx_health.sh"  # 检查nginx是否存活以及重启nginx
-    interval 2                                      # 检查间隔，单位为秒
-    weight 2                                        # 权重，用于决定节点状态
+# 配置证书和私钥
+
+`conf.d/default.conf`
+
+```bash
+[root@CentOS7 conf.d]# cat default.conf 
+server {
+        listen 443 ssl;
+        server_name localhost;
+
+        ssl_certificate cert.pem;
+        ssl_certificate_key key.pem;
+
+        location / {
+            #root /usr/share/nginx/html;
+            proxy_pass http://backend;
+            #proxy_pass http://192.168.234.104:8080;
+            index index.html index.htm;
+        } 
 }
 ```
 
-!!!试的是只有当其中一个keepalived挂了，另外一个才会生效!!!
+证书`cert.pem`和私钥`key.pem`放在`/etc/nginx`下。
+
+设置完毕重启nginx后可以通过 `https:/xxxx`来访问服务。

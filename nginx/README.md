@@ -78,13 +78,25 @@ systemctl disable nginx
 
 ## 目录说明
 
-- `/etc/nginx/` nginx安装目录
+- `/etc/nginx/` */etc/nginx/* 目录是 NGINX 服务器的默认配置根，您可以从中找到指示 NGINX 如
+  何运行的配置文件。
 
-- `/etc/nginx/nginx.conf` 配置文件
+- `/etc/nginx/nginx.conf` */etc/nginx/nginx.conf* 文件是 NGINX 服务使用的默认配置入口点。此配置文件能够
+  为 worker 进程、调优、日志记录、动态模块的加载以及对其他 NGINX 配置文件
+  的引用设置全局设置。在默认配置中， */etc/nginx/nginx.conf* 文件包括顶层 http 代
+  码块，也就是上下文，它提供了下述目录中的所有配置文件。
+
+- `/etc/nginx/conf.d` */etc/nginx/conf.d/* 目录包含默认的 HTTP 服务器配置文件，其中以 *.conf* 结尾的
+  文件都包含在 */etc/nginx/nginx.conf* 文件的顶层 http 代码块中。最佳实践是利用
+  include 语句并以这种方式组织配置，从而保持配置文件的简洁。在某些软件包仓
+  库中，此文件夹被命名为 *sites-enabled*，配置文件链接到 *site-available* 文件夹；
+  此惯例已不再使用
 
 - `/usr/share/nginx/html` html页面
 
-- `/var/log/nginx` 日志文件路径
+- `/var/log/nginx` */var/log/nginx/* 目录是 NGINX 的默认日志位置，您可以从中找到一个 *access.log*
+  文件和 *error.log* 文件。访问日志包含 NGINX 服务的每条请求的条目。如果启用了
+  debug 模块，则错误日志文件包含错误事件和调试信息
 
 - `/var/run/nginx.pid` nginx进程id，`systemctl`命令会用到
 
@@ -149,13 +161,13 @@ find / -name '*nginx*'
 
 其中标志可能是以下其中一种:
 
-- `stop` — fast shutdown
+- `stop` — 立即停止 NGINX 进程。
 
-- `quit` — graceful shutdown
+- `quit` — 在完成当前正在处理的请求后停止 NGINX 进程。
 
-- `reload` — reloading the configuration file
+- `reload` — 重新加载配置。
 
-- `reopen` — reopening the log files
+- `reopen` — 重新打开日志文件。
 
 例如，要停止nginx进程，等待工作进程完成当前请求，可以执行以下命令:
 
@@ -178,12 +190,16 @@ ps -ax | grep nginx
 
 ## 常用其他命令
 ```bash
-# 查看版本
+# 显示 NGINX 帮助菜单
+nginx -h
+# 显示 NGINX 版本
 nginx -v
-# 查看nginx详细信息
+# 显示 NGINX 版本、 build 信息和配置参数，这些参数显示了 NGINX 二进制文件中内置的模块。
 nginx -V
-# 查看nginx配置是否有问题
+# 测试 NGINX 配置
 nginx -t
+# 测试 NGINX 配置并将验证后的配置打印到屏幕上。此命令在寻求支持时很有用。
+nginx -T
 ```
 
 ## nginx.conf配置文件
