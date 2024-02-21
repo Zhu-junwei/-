@@ -325,6 +325,14 @@ upstream backend {
 
 > 根据客户端的ip地址转发同一台服务器，可以保持会话。（现实中客户ip会改变）
 
+```bash
+upstream backend {
+        ip_hash;
+        server 192.168.234.102:8080;
+        server 192.168.234.103:8080;
+    }
+```
+
 ## least_conn
 
 > 最少连接访问。给负载的机器连接较少的分配请求。
@@ -337,6 +345,20 @@ upstream backend {
 ## fair
 
 > 根据后端服务器的响应时间转发请求。
+
+## $cookie_jsessionid 流量分发
+
+> 通过哈希算法来决定请求被转发到哪一个服务器。这里，它使用客户端请求中的jsessionid cookie来进行哈希运算。这意味着，具有相同jsessionid cookie的请求将会被转发到同一个服务器，
+
+```bash
+upstream backend {
+        hash $cookie_jsessionid;
+        server 192.168.234.102:8080;
+        server 192.168.234.103:8080;
+    }
+```
+
+**缺点**：需要后端服务下发JSESSIONID。
 
 # 使用正则设置动静分离
 
@@ -860,3 +882,6 @@ server {
 证书`cert.pem`和私钥`key.pem`放在`/etc/nginx`下。
 
 设置完毕重启nginx后可以通过 `https:/xxxx`来访问服务。
+
+
+
