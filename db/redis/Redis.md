@@ -154,7 +154,7 @@ redis 127.0.0.1:6379> ZRANGEBYSCORE tutoriallist-z 0 10
 3) "sql"
 ```
 
-![](img/Sorted set.png)
+![](img/Sorted%20set.png)
 
 [使用场景](https://zhuanlan.zhihu.com/p/631670359)：
 
