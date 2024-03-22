@@ -164,27 +164,34 @@ ctrl+shift+R==搜索类   CTRL+N：按照类名搜索类
 
 ```
 Alt+1，快速打开或隐藏工程面板
-Alt+7 快速打开文件结构
+Alt+F1,1 打开当前文件在项目中的位置
+Alt+4，运行控制台
+Alt+7 侧边栏查看结构
+Ctrl+F12 查看类中的方法
 Alt+F7，查找整个工程中使用地某一个类、方法或者变量的位置
-Alt+/ 代码提示
-Alt+Enter 代码修复提示
-Alt+Insert 代码生成（可以生成构造器/Getter/Setter等）
+Ctrl+空格 代码提示（可以调用哪些方法）
+Alt+Enter 代码提示(给出建议,导入类)
+Alt+Insert 创建类/代码生成（可以生成构造器/Getter/Setter等）
 Alt+Home 导航栏
-Alt+鼠标单击关闭 关闭其他
 Alt+←/→ 左右切换正在打开的文件
+Ctrl+Alt+←/→ 左右切换上一个使用过的文件
+Ctrl+Alt+[/] 前后切换已经项目
 Alt+↑/↓ 上下切换方法
-Alt+` VCS操作
 
-Ctrl+E,Ctrl+Tab 切换最近打开的文件或目录结构
+Alt+` VCS操作
+Alt+鼠标单击关闭 关闭其他
+
+Ctrl+Tab 在已经打开的文件间切换（松开后直接切过去）
+Ctrl+E  在最近打开的文件间切换（需要回车确认）
 Ctrl+Shift+E 打开最近的文件
-Ctrl+Enter 在当前行下方新建一行
+Ctrl+Enter 光标后面的内容放在下一行
 Ctrl+P 显示参数信息
+Ctrl+W，可以选择单词继而语句继而行继而函数
 Ctrl+X 删除一行，剪切一行
 Ctrl+Y 删除一行
 Ctrl+Z 撤销上一步操作
 Ctrl+Shift+Z 恢复撤销
 Ctrl+D 复制当前行到下一行
-Ctrl+W，可以选择单词继而语句继而行继而函数
 Ctrl+Shift+W，取消选择光标所在词
 Ctrl+'-'/'+'折叠/展开代码块
 Ctrl+Shift+'-'/'+'折叠/展开全部代码块（有时需要按两下）
@@ -201,8 +208,6 @@ Ctrl+鼠标左键  查看接口中的方法/回到调用的地方
 Crtl+Shift+O 更新maven依赖
 Ctrl+F4，关闭当前文件
 Ctrl+F8 添加/取消断点
-Ctrl+F12 查看类中的方法
-Ctrl+空格 代码提示
 Ctrl+N 打开搜索类
 Ctrl+Shift+N 搜素文件
 Ctrl+Ctrl 运行任何东西
@@ -211,4 +216,6 @@ Shift+Shift 任意搜索
 Shift+F6 重命名
 Shift+Enter 另起一行编辑
 Shift+Alt+↑/↓ 移动当前行到上一行/下一行
+
+Page Up/Down  上下翻页
 ```
