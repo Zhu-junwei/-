@@ -59,6 +59,6 @@ dnf clean all
 
 ### 清理多余内核
 ```bash
-package-cleanup --oldkernels --count=1
+dnf remove --oldinstallonly --setopt installonly_limit=2 kernel
 ```
 

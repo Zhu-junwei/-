@@ -118,6 +118,26 @@ source ~/.bashrc
 
 ![2020-03-17_172109](img/2020-03-17_172109.png)
 
+# 安装其他Linux
+
+> 使用`proot-distro`安装命令
+
+常用命令
+```bash
+# 帮助命令
+proot-distro help
+# 列出所有系统
+proot-distro list
+# 安装系统
+proot-distro install debian
+# 启动系统
+proot-distro login debian
+# 卸载系统
+proot-distro remove debian
+```
+
+
+
 # 安装nethunter
 
 > Kali NetHunter is a free & Open-source Mobile Penetration Testing Platform for Android devices, based on Kali Linux.
