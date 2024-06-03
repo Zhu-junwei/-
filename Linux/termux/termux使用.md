@@ -31,12 +31,13 @@ apt update && apt upgrade
 deb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main
 ```
 
-请使用内置或安装在 Termux 里的文本编辑器，例如 `vi` / `vim` / `nano` 等，不要使用 RE 管理器等其他具有 ROOT 权限的外部 APP 来修改 Termux 的文件
+请使用内置或安装在 Termux 里的文本编辑器，例如 `vi` / `vim` / `nano` 等，不要使用 RE 管理器等其他具有 ROOT 权限的外部 APP
+来修改 Termux 的文件
 
 ## 安装常用软件
 
 ```shell
-pkg install vim openssh curl wget sl tree nmap root-repo openjdk-17 x11-repo -y
+pkg install vim openssh curl wget sl tree nmap root-repo openjdk-17 x11-repo termux-exec proot -y
 ```
 
 ## 起别名
@@ -123,6 +124,7 @@ source ~/.bashrc
 > 使用`proot-distro`安装命令
 
 常用命令
+
 ```bash
 # 帮助命令
 proot-distro help
@@ -135,8 +137,6 @@ proot-distro login debian
 # 卸载系统
 proot-distro remove debian
 ```
-
-
 
 # 安装nethunter
 
@@ -179,9 +179,9 @@ wget https://kali.download/nethunter-images/current/rootfs/kalifs-amd64-full.tar
 
 ## nethunter访问
 
-- nh           #直接命令行进入cli
-- nh kex &     #后台启动GUI
-- nh kex stop  #停止GUI
+- nh #直接命令行进入cli
+- nh kex & #后台启动GUI
+- nh kex stop #停止GUI
 
 使用vnc工具进入桌面
 
@@ -225,33 +225,71 @@ nh kex stop
 
 ![安装成功](img/20230305_164341.png)
 
+# 常用软件
+
+## ngrok内网传透
+
+下载二进制文件
+```bash
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
+```
+> 如果版本有变，需要到[ngrok官网](https://ngrok.com/download)下载。
+
+解压
+```bash
+tar xvzf ngrok-v3-stable-linux-arm64.tgz -C $PREFIX/bin/
+```
+
+令牌
+
+> [注册](https://dashboard.ngrok.com/signup)一个 Ngrok 账户，并获取你的[身份验证令牌](https://dashboard.ngrok.com/get-started/your-authtoken)（auth token）。
+
+```bash
+ngrok config add-authtoken 1k1h3tOszNfKnpra2sodUJcxKzu_XeLTNvKBmek7KGwRccyw
+```
+
+启动 Ngrok
+
+> 启动一个 HTTP 隧道，将本地服务（例如在端口 8080 上运行的服务）暴露到外网
+
+```bash
+ngrok http 8080
+```
+
 # 备份与恢复
 
 ## 备份
+
 1. 确保有存储权限
+
 ```shell
 termux-setup-storage
 ```
 
 2. 备份文件
+
 ```shell
 tar -zcf /sdcard/termux-backup.tar.gz -C /data/data/com.termux/files ./home ./usr
 ```
 
 ## 恢复
+
 1. 确保有存储权限
+
 ```shell
 termux-setup-storage
 ```
 
 2. 恢复备份文件
+
 ```shell
 tar -zxf /sdcard/termux-backup.tar.gz -C /data/data/com.termux/files --recursive-unlink --preserve-permissions
 ```
+
 > 恢复后重启应用即可
 
-
 ## 使用系统工具备份与恢复
+
 最新版本的有`termux-backup`和`termux-restore`命令提供备份与恢复操作，可参考官方文档。
 参考：https://wiki.termux.com/wiki/Backing_up_Termux
 
@@ -262,5 +300,52 @@ termux-backup /sdcard/backup.tar.xz
 termux-restore /sdcard/backup.tar.xz
 ```
 
-
 备份在重新安装termux时非常之有用！后悔之前不会备份~
+
+# 常用运维
+
+## 开启传统Linux文件布局
+
+> 前提：已安装`proot`
+
+运行示例：
+
+```bash
+termux-chroot
+ls /
+```
+
+## 查询开放的端口
+
+# 终端设置
+
+Termux 终端可以通过编辑 `~/.termux/termux.properties` 文件来配置。该文件使用简单的 `key=value` 属性语法。
+
+要使更改在编辑属性文件后生效，请执行 `termux-reload-settings` 或通过关闭所有会话并再次启动应用程序来重新启动 Termux。
+
+## 深色主题
+
+> 强制应用程序对抽屉和对话框使用深色主题
+
+```properties
+use-black-ui=true
+```
+
+*注意：如果系统 UI 使用深色主题，则会在 Android 9+ 上自动启用此功能。*
+
+## 全屏模式
+
+> 启用全屏模式
+
+```properties
+fullscreen=true
+```
+
+启用全屏后，“额外按键”视图可能不再可见。要修复，请添加
+
+```properties
+use-fullscreen-workaround=true
+```
+
+*注意：全屏可能不适用于所有设备，因此目前认为它不稳定。*
+
