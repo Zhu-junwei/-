@@ -37,7 +37,7 @@ deb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main
 ## 安装常用软件
 
 ```shell
-pkg install vim openssh curl wget sl tree nmap root-repo openjdk-17 x11-repo termux-exec proot -y
+pkg install vim openssh curl wget sl tree nmap root-repo openjdk-17 x11-repo termux-exec termux-services proot -y
 ```
 
 ## 起别名
@@ -121,6 +121,8 @@ source ~/.bashrc
 
 # 安装其他Linux
 
+## 安装debian
+
 > 使用`proot-distro`安装命令
 
 常用命令
@@ -137,6 +139,10 @@ proot-distro login debian
 # 卸载系统
 proot-distro remove debian
 ```
+
+### 使用debian安装ollama
+
+https://www.bilibili.com/read/cv32453978/?jump_opus=1
 
 # 安装nethunter
 
@@ -245,7 +251,7 @@ tar xvzf ngrok-v3-stable-linux-arm64.tgz -C $PREFIX/bin/
 > [注册](https://dashboard.ngrok.com/signup)一个 Ngrok 账户，并获取你的[身份验证令牌](https://dashboard.ngrok.com/get-started/your-authtoken)（auth token）。
 
 ```bash
-ngrok config add-authtoken 1k1h3tOszNfKnpra2sodUJcxKzu_XeLTNvKBmek7KGwRccyw
+ngrok config add-authtoken xxxxxxxx(your authtoken)
 ```
 
 启动 Ngrok
@@ -254,6 +260,74 @@ ngrok config add-authtoken 1k1h3tOszNfKnpra2sodUJcxKzu_XeLTNvKBmek7KGwRccyw
 
 ```bash
 ngrok http 8080
+```
+
+## mariadb
+
+### 安装mariadb
+
+更新并升级 Termux 包管理器：
+```bash
+pkg update && pkg upgrade
+```
+
+安装 MariaDB：
+```bash
+pkg install mariadb
+```
+
+初始化 MariaDB 数据目录：
+```bash
+mariadb-install-db
+```
+
+启动mariadb
+```bash
+mariadbd-safe --datadir=$PREFIX/var/lib/mysql &
+```
+
+设置root密码
+> 使用系统管理员权限的用户账户（如 u0_a306），可以尝试使用这个用户登录并修改 root 密码：
+```bash
+mariadb -u `whoami`
+```
+
+然后运行：
+```bash
+ALTER USER 'root'@'localhost' IDENTIFIED BY '123456';
+CREATE USER 'root'@'%' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+exit;
+```
+
+查询系统用户
+```mysql
+select user,host from mysql.user;
+```
+
+完成安全设置
+
+重置 root 密码后，再次运行 mariadb-secure-installation 并使用新密码进行安全设置：
+```bash
+mariadb-secure-installation
+```
+
+停止启动 MariaDB：
+
+```bash
+# 停止
+killall mariadbd
+# 启动
+mariadbd-safe --datadir=$PREFIX/var/lib/mysql &
+```
+
+### 卸载
+```bash
+killall mariadbd
+pkg uninstall mariadb
+rm -rf $PREFIX/var/lib/mysql
+rm -rf $PREFIX/etc/my.cnf
 ```
 
 # 备份与恢复
