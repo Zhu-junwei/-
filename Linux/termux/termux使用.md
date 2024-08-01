@@ -40,7 +40,7 @@ deb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main
 pkg install vim openssh curl wget sl tree nmap root-repo openjdk-17 x11-repo termux-exec termux-services proot -y
 ```
 
-## 起别名
+## 别名与自启动
 
 编辑~/.alias文件
 
@@ -55,23 +55,62 @@ alias ifconfig='ifconfig 2>/dev/null'
 
 ```shell
 if [ -f ~/.alias ]; then
-	. ~/.alias
+        . ~/.alias
 fi
 # 设置语系
-
 LANG=zh_CN.UTF-8
 LANGUAGE=zh_CN.UTF-8
 echo "欢迎: "$(whoami)
 echo "时间:" `date "+%Y-%m-%d %H:%M"`
 echo -e "IP  :\e[33m" `ifconfig|grep 'inet'|cut -d ' ' -f 10|grep -v '127.0.0.1'` "\e[0m"
-if pgrep -x "sshd" >/dev/null
-then
-	:
-else
-	sshd
-fi
-curl zh.wttr.in/上海?format=3
+# 开机自启
+./.auto_startup/startup_manager.sh
 ```
+
+`startup_manager.sh`用来设置一些开机自启的脚本
+
+创建`startup_manager.sh`文件
+```bash
+mkdir -p ~/.auto_startup
+touch ~/.auto_startup/startup_manager.sh
+chmod +x ~/.auto_startup/startup_manager.sh
+```
+
+`startup_manager.sh`文件根据自己环境情况设置
+```bash
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+# sshd
+if ! pgrep -x "sshd" >/dev/null; then
+    echo "starting sshd"
+    sshd
+fi
+
+# mariadb
+if ! pgrep "mariadb" >/dev/null; then
+    echo "starting mariadb"
+    nohup mariadbd-safe --datadir=$PREFIX/var/lib/mysql > $SCRIPT_DIR/log/mariadb.log 2>&1 &
+fi
+
+# redis
+if ! pgrep "redis" >/dev/null; then
+    echo "starting redis"
+    redis-server $PREFIX/etc/redis.conf
+fi
+
+# minio
+if ! pgrep "minio" >/dev/null; then
+    echo "starting minio"
+    export MINIO_ROOT_USER=minioadmin
+    export MINIO_ROOT_PASSWORD=minioadmin
+    export MINIO_VOLUMES=$HOME/.minio-data
+    export MINIO_OPTS="--console-address :9001"
+    nohup minio server $MINIO_OPTS $MINIO_VOLUMES > $SCRIPT_DIR/log/minio.log 2>&1 &
+fi
+```
+
 
 重新加载.bashrc文件
 
@@ -328,6 +367,42 @@ killall mariadbd
 pkg uninstall mariadb
 rm -rf $PREFIX/var/lib/mysql
 rm -rf $PREFIX/etc/my.cnf
+```
+
+## minio
+
+> minio 是AI数据基础设施的对象存储。
+
+### 安装minio
+```bash
+pkg install minio
+```
+
+### 配置自启动
+
+> 确保以及创建了自启动脚本
+
+```bash
+ll ~/.auto_startup/startup_manager.sh
+```
+
+编辑自启动脚本`~/.auto_startup/startup_manager.sh`, 添加以下内容：
+
+```bash
+# minio
+if ! pgrep "minio" >/dev/null; then
+    echo "starting minio"
+    export MINIO_ROOT_USER=minioadmin
+    export MINIO_ROOT_PASSWORD=minioadmin
+    export MINIO_VOLUMES=$HOME/.minio-data
+    export MINIO_OPTS="--console-address :9001"
+    nohup minio server $MINIO_OPTS $MINIO_VOLUMES > $SCRIPT_DIR/log/minio.log 2>&1 &
+fi
+```
+
+### 生效配置
+```bash
+source ~/.bashrc
 ```
 
 # 备份与恢复

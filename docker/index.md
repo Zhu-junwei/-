@@ -63,6 +63,8 @@ sudo yum remove xxx
 
 ## Docker安装
 
+该步骤适用于CentOS 7系统。最新版本参考[官方文档](https://docs.docker.com/engine/install/centos/)。
+
 安装依赖包
 ```bash
 sudo yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -110,3 +112,11 @@ Docker version 24.0.7, build afdd53b
 sudo usermod -aG docker your_username
 ```
 请将your_username替换为你的实际用户名。然后，注销并重新登录以应用更改。
+
+# docker compose使用
+
+
+
+# docker其他文档
+
+参考：https://www.cnblogs.com/zjw-blog/category/1886775.html

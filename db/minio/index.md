@@ -1,10 +1,10 @@
 # 简介
 
-> 
+> [MinIO][] 是AI数据基础设施的对象存储。
 
 # 安装
 
-> 前往[MinIO官网](https://min.io/download?license=agpl&platform=linux)下载适用于Linux的MinIO服务器。你也可以使用以下命令直接下载最新版本：
+> 前往[MinIO官网][]下载适用于Linux的MinIO服务器。你也可以使用以下命令直接下载最新版本：
 
 ```bash
 wget https://dl.min.io/server/minio/release/linux-amd64/minio
@@ -101,3 +101,18 @@ systemctl enable minio
 ```
 
 # 卸载
+
+> **删除前请仔细检查**
+
+```bash
+systemctl stop minio
+yum remove minio
+rm -rf /usr/local/bin/minio
+rm -rf /etc/default/minio
+rm -rf /etc/systemd/system/minio.service
+rm -rf /data/minio
+```
+
+[MinIO]: https://min.io/
+
+[MinIO官网]: https://min.io/download?license=agpl&platform=linux
