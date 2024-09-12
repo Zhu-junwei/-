@@ -468,6 +468,8 @@ ls /
 
 # 终端设置
 
+详细设置参考：https://wiki.termux.com/wiki/Terminal_Settings
+
 Termux 终端可以通过编辑 `~/.termux/termux.properties` 文件来配置。该文件使用简单的 `key=value` 属性语法。
 
 要使更改在编辑属性文件后生效，请执行 `termux-reload-settings` 或通过关闭所有会话并再次启动应用程序来重新启动 Termux。
@@ -497,4 +499,12 @@ use-fullscreen-workaround=true
 ```
 
 *注意：全屏可能不适用于所有设备，因此目前认为它不稳定。*
+
+## 键盘输入问题
+
+> 我的手机在使用英文输入时，需要进行单词候选才能把命令输入到终端中，这与平时的终端使用不太一直，可以修改如下配置
+
+```properties
+enforce-char-based-input = true
+```
 
