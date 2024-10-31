@@ -53,5 +53,5 @@ Resilio Sync 适合需要频繁在多个设备之间共享和同步大文件或�
 | 网友荐书-只读密钥     | BZ7VZSMPAORFQ2FP5PSJK4P2PAND6WD66 | 失效                         |
 | 学习书单          | BR5XUQVQL7QFJBIIKFSAETAFCPANTBRCO | 0.98G                      |
 | 科普读物          | B7ZJOFU5YGHTVQOT42JLGOULNTPTZ73FS | 3.13G                      |
-| 主题分类          | BZCTXN7QYCMXS5PINIEO3JU7C7YFI6GOR | 19.5G 按学科及其分支分类            |
-| 丛书系列          | BQ36ZETYSW4SLJ2VMPIGXATAEMXYKXDHT | 74.2G侧重 “数学 & 物理 & 金融”     |
+| 主题分类          | BZCTXN7QYCMXS5PINIEO3JU7C7YFI6GOR | 44.14G 按学科及其分支分类           |
+| 丛书系列          | BQ36ZETYSW4SLJ2VMPIGXATAEMXYKXDHT | 74.2G 侧重 “数学 & 物理 & 金融”    |
