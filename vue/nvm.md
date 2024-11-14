@@ -4,7 +4,7 @@
 
 > Windows电脑node.js管理器。可以方便node.js的安装与切换。
 
-最新版本`1.1.11` [coreybutler/nvm-windows](https://github.com/coreybutler/nvm-windows)
+最新版本`1.1.12` [coreybutler/nvm-windows](https://github.com/coreybutler/nvm-windows)
 
 有一个更高star的nvm是[nvm-sh/nvm](https://github.com/nvm-sh/nvm)，没仔细研究。
 
