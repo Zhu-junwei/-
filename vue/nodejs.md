@@ -27,13 +27,13 @@ npm config get registry
 淘宝源：
 
 ```
-npm config set registry https://registry.npm.taobao.org/
+npm config set registry https://registry.npmmirror.com
 ```
 
 官方源：
 
 ```
-npm config set registry https://registry.npmmirror.com
+npm config set registry https://registry.npmjs.org
 ```
 
 ## 缓存设置
