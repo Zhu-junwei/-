@@ -2,7 +2,13 @@
 
 > npm: Node Package Manager, 是Node.js的包管理工具
 
-## 配置npm的全局安装路径
+## 查看npm配置
+
+```
+npm config list
+```
+
+## 配置npm的全局模块的安装路径
 
 使用管理员身份运行命令行，在命令行中，执行如下指令：
 
@@ -18,13 +24,84 @@ npm config set prefix "E:\nodejs"
 npm config get registry
 ```
 
-> 默认的为：https://registry.npmmirror.com ，npm官方源
-
-
-~~修改为淘宝的源（实现了，还是用官方的吧）：~~
+淘宝源：
 
 ```
-npm config set registry http://registry.npm.taobao.org/
+npm config set registry https://registry.npm.taobao.org/
+```
+
+官方源：
+
+```
+npm config set registry https://registry.npmmirror.com
+```
+
+## 缓存设置
+
+查看缓存路径：
+
+```
+npm config get cache
+```
+
+清空缓存：
+
+```
+npm cache clean
+```
+
+## 查看依赖
+
+查看所有已安装的模块：
+
+```
+npm list
+```
+
+查看全局已安装的模块：
+
+```
+npm list -g --depth=0
+```
+
+查看某个模块的详细信息：
+
+```
+npm list <package-name>
+```
+
+## 卸载依赖
+
+卸载某个模块：
+
+```
+npm uninstall <package-name>
+````
+
+卸载并删除模块的依赖项：
+
+```
+npm uninstall <package-name> --save
+```
+
+卸载全局模块：
+
+```
+npm uninstall -g <package-name>
+```
+
+## 更新依赖
+
+更新项目中的所有依赖：
+
+```
+npm update
+```
+
+更新某个特定的模块：
+
+```
+npm update <package-name>
 ```
 
 # pnpm
@@ -34,11 +111,13 @@ npm config set registry http://registry.npm.taobao.org/
 ## 安装 pnpm
 
 如果你还没有安装 pnpm，可以用以下命令通过 npm 来安装：
+
 ```bash
 npm install -g pnpm
 ```
 
 ## 更新包
+
 ```
 pnpm update -g <package>
 ```
