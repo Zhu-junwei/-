@@ -70,6 +70,7 @@ echo -e "IP  :\e[33m" `ifconfig|grep 'inet'|cut -d ' ' -f 10|grep -v '127.0.0.1'
 `startup_manager.sh`用来设置一些开机自启的脚本
 
 创建`startup_manager.sh`文件
+
 ```bash
 mkdir -p ~/.auto_startup
 touch ~/.auto_startup/startup_manager.sh
@@ -77,6 +78,7 @@ chmod +x ~/.auto_startup/startup_manager.sh
 ```
 
 `startup_manager.sh`文件根据自己环境情况设置
+
 ```bash
 #!/bin/bash
 
@@ -111,7 +113,6 @@ if ! pgrep "minio" >/dev/null; then
 fi
 ```
 
-
 重新加载.bashrc文件
 
 ```
@@ -142,7 +143,8 @@ source ~/.bashrc
 
 2、为了Termux能读出我们手机上的根目录下，需要执行 `termux-setup-storage`命令。现在我们的根目录就被映射到了~/storage/shared。
 
-3、然后我们通过cat命令把根目录的公钥文件内容写到authorized_keys文件里，执行如下命令，`cat ~/storage/shared/id_rsa.pub >> ~/.ssh/authorized_keys`。
+3、然后我们通过cat命令把根目录的公钥文件内容写到authorized_keys文件里，执行如下命令，
+`cat ~/storage/shared/id_rsa.pub >> ~/.ssh/authorized_keys`。
 
 4、上面三部操作完之后现在可以启动手机上ssh服务了，执行 `sshd`命令。
 
@@ -183,13 +185,13 @@ proot-distro remove debian
 
 https://www.bilibili.com/read/cv32453978/?jump_opus=1
 
-# 安装nethunter
+## 安装nethunter
 
 > Kali NetHunter is a free & Open-source Mobile Penetration Testing Platform for Android devices, based on Kali Linux.
 >
 > KaliNetHunter是一个基于KaliLinux的Android设备的免费开源移动渗透测试平台.
 
-## 准备安装脚本和系统
+### 准备安装脚本和系统
 
 - 脚本
 
@@ -208,7 +210,7 @@ wget https://kali.download/nethunter-images/current/rootfs/kalifs-amd64-full.tar
 
 **脚本和系统必须放到家目录下**
 
-## 安装系统
+### 安装系统
 
 ```shell
 # 运行install-nethunter-termux启动安装
@@ -222,7 +224,7 @@ wget https://kali.download/nethunter-images/current/rootfs/kalifs-amd64-full.tar
 
 ![安装成功](img/20230305_022920.png)
 
-## nethunter访问
+### nethunter访问
 
 - nh #直接命令行进入cli
 - nh kex & #后台启动GUI
@@ -248,9 +250,9 @@ vim $PREFIX/etc/rinetd.conf
 rinetd
 ```
 
-## nethunter启停脚本
+### nethunter启停脚本
 
-### nh_start.sh
+#### nh_start.sh
 
 ```shell
 # nh=nethunter
@@ -258,7 +260,7 @@ rinetd
 nh kex &
 ```
 
-### nh_stop.sh
+#### nh_stop.sh
 
 ```shell
 # nh=nethunter
@@ -266,7 +268,7 @@ pkill rinetd
 nh kex stop
 ```
 
-## nethunter界面
+### nethunter界面
 
 ![安装成功](img/20230305_164341.png)
 
@@ -275,25 +277,32 @@ nh kex stop
 ## ngrok内网传透
 
 下载二进制文件
+
 ```bash
 wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
 ```
+
 > 如果版本有变，需要到[ngrok官网](https://ngrok.com/download)下载。
 
 解压
+
 ```bash
 tar xvzf ngrok-v3-stable-linux-arm64.tgz -C $PREFIX/bin/
 ```
 
 令牌
 
-> [注册](https://dashboard.ngrok.com/signup)一个 Ngrok 账户，并获取你的[身份验证令牌](https://dashboard.ngrok.com/get-started/your-authtoken)（auth token）。
+> [注册](https://dashboard.ngrok.com/signup)一个 Ngrok
+> 账户，并获取你的[身份验证令牌](https://dashboard.ngrok.com/get-started/your-authtoken)（auth token）。
 
 ```bash
 ngrok config add-authtoken xxxxxxxx(your authtoken)
 ```
 
 启动 Ngrok
+
+在`termux-chroot`下启动`ngrok`
+，不知道为什么，我有次无法直接使用ngrok.[参考](https://www.reddit.com/r/termux/comments/18wnjoi/using_ngrok_on_termux/?rdt=40538)
 
 > 启动一个 HTTP 隧道，将本地服务（例如在端口 8080 上运行的服务）暴露到外网
 
@@ -306,32 +315,38 @@ ngrok http 8080
 ### 安装mariadb
 
 更新并升级 Termux 包管理器：
+
 ```bash
 pkg update && pkg upgrade
 ```
 
 安装 MariaDB：
+
 ```bash
 pkg install mariadb
 ```
 
 初始化 MariaDB 数据目录：
+
 ```bash
 mariadb-install-db
 ```
 
 启动mariadb
+
 ```bash
 mariadbd-safe --datadir=$PREFIX/var/lib/mysql &
 ```
 
 设置root密码
 > 使用系统管理员权限的用户账户（如 u0_a306），可以尝试使用这个用户登录并修改 root 密码：
+
 ```bash
 mariadb -u `whoami`
 ```
 
 然后运行：
+
 ```bash
 ALTER USER 'root'@'localhost' IDENTIFIED BY '123456';
 CREATE USER 'root'@'%' IDENTIFIED BY '123456';
@@ -341,13 +356,16 @@ exit;
 ```
 
 查询系统用户
+
 ```mysql
-select user,host from mysql.user;
+SELECT user, host
+FROM mysql.user;
 ```
 
 完成安全设置
 
 重置 root 密码后，再次运行 mariadb-secure-installation 并使用新密码进行安全设置：
+
 ```bash
 mariadb-secure-installation
 ```
@@ -362,6 +380,7 @@ mariadbd-safe --datadir=$PREFIX/var/lib/mysql &
 ```
 
 ### 卸载
+
 ```bash
 killall mariadbd
 pkg uninstall mariadb
@@ -374,6 +393,7 @@ rm -rf $PREFIX/etc/my.cnf
 > minio 是AI数据基础设施的对象存储。
 
 ### 安装minio
+
 ```bash
 pkg install minio
 ```
@@ -401,8 +421,83 @@ fi
 ```
 
 ### 生效配置
+
 ```bash
 source ~/.bashrc
+```
+
+## http-server
+
+`http-server` 是一个简单的、零配置的命令行工具，用于快速搭建静态文件服务器。以下是它的使用方法：
+
+确保已经安装了`node.js`
+
+```
+pkg install nodejs
+```
+
+### 安装
+
+安装`http-server`
+
+```
+npm install -g http-server
+```
+
+### 启动服务器
+
+在终端中，进入需要托管的静态文件目录，然后运行：
+
+```
+http-server
+```
+
+默认情况下，服务器会运行在 http://127.0.0.1:8080 或 http://localhost:8080。
+
+### 常用选项
+
+- **指定端口** 使用 `-p` 或 `--port` 指定端口号：
+
+```
+http-server -p 3000
+```
+
+- **指定目录** 如果希望托管的目录不是当前目录，可以直接指定：
+
+```
+http-server path/to/your/directory
+```
+
+- **缓存设置** 使用 `-c` 或 `--cache` 设置缓存时间（秒），默认是 3600 秒。如果不希望使用缓存：
+
+```
+http-server -c-1
+```
+
+- **启用压缩** 使用 `-g` 或 `--gzip` 开启 gzip 压缩，提高传输效率：
+
+```
+http-server --gzip
+```
+
+- **自动打开浏览器** 使用 `-o` 或 `--open` 自动打开默认浏览器：
+
+```
+http-server -o
+```
+
+- **HTTPS 支持** 如果需要启用 HTTPS，需要提供密钥和证书：
+
+```
+http-server --ssl --cert path/to/cert.pem --key path/to/key.pem
+```
+
+### 卸载
+
+如果不需要 http-server，可以通过以下命令卸载：
+
+```
+npm uninstall -g http-server
 ```
 
 # 备份与恢复
@@ -505,6 +600,6 @@ use-fullscreen-workaround=true
 > 我的手机在使用英文输入时，需要进行单词候选才能把命令输入到终端中，这与平时的终端使用不太一直，可以修改如下配置
 
 ```properties
-enforce-char-based-input = true
+enforce-char-based-input=true
 ```
 
