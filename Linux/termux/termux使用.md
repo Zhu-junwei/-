@@ -37,10 +37,10 @@ deb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main
 ## 安装常用软件
 
 ```shell
-pkg install vim openssh curl wget sl tree nmap root-repo openjdk-17 x11-repo termux-exec termux-services proot -y
+pkg install vim openssh curl wget sl tree nmap netcat-openbsd root-repo openjdk-17 x11-repo termux-exec termux-services proot -y
 ```
 
-## 别名与自启动
+## 别名
 
 编辑~/.alias文件
 
@@ -49,6 +49,10 @@ alias vi='vim'
 alias ll='ls -l'
 alias grep='grep --color=auto'
 alias ifconfig='ifconfig 2>/dev/null'
+alias debian='proot-distro login debian'
+alias sas='./.auto_startup/start_service.sh'
+alias sos='./.auto_startup/stop_service.sh'
+alias cs='./.auto_startup/check_service.sh'
 ```
 
 编辑~/.bashrc文件
@@ -57,61 +61,20 @@ alias ifconfig='ifconfig 2>/dev/null'
 if [ -f ~/.alias ]; then
         . ~/.alias
 fi
-# 设置语系
-LANG=zh_CN.UTF-8
-LANGUAGE=zh_CN.UTF-8
+# LANG=zh_CN.UTF-8
+# LANGUAGE=zh_CN.UTF-8
 echo "欢迎: "$(whoami)
 echo "时间:" `date "+%Y-%m-%d %H:%M"`
 echo -e "IP  :\e[33m" `ifconfig|grep 'inet'|cut -d ' ' -f 10|grep -v '127.0.0.1'` "\e[0m"
-# 开机自启
-./.auto_startup/startup_manager.sh
+
+# 启动所有的服务，根据自己化境情况设置
+sas all
+
+# 检查服务的运行状态
+# cs
 ```
 
-`startup_manager.sh`用来设置一些开机自启的脚本
-
-创建`startup_manager.sh`文件
-
-```bash
-mkdir -p ~/.auto_startup
-touch ~/.auto_startup/startup_manager.sh
-chmod +x ~/.auto_startup/startup_manager.sh
-```
-
-`startup_manager.sh`文件根据自己环境情况设置
-
-```bash
-#!/bin/bash
-
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
-
-# sshd
-if ! pgrep -x "sshd" >/dev/null; then
-    echo "starting sshd"
-    sshd
-fi
-
-# mariadb
-if ! pgrep "mariadb" >/dev/null; then
-    echo "starting mariadb"
-    nohup mariadbd-safe --datadir=$PREFIX/var/lib/mysql > $SCRIPT_DIR/log/mariadb.log 2>&1 &
-fi
-
-# redis
-if ! pgrep "redis" >/dev/null; then
-    echo "starting redis"
-    redis-server $PREFIX/etc/redis.conf
-fi
-
-# minio
-if ! pgrep "minio" >/dev/null; then
-    echo "starting minio"
-    export MINIO_ROOT_USER=minioadmin
-    export MINIO_ROOT_PASSWORD=minioadmin
-    export MINIO_VOLUMES=$HOME/.minio-data
-    export MINIO_OPTS="--console-address :9001"
-    nohup minio server $MINIO_OPTS $MINIO_VOLUMES > $SCRIPT_DIR/log/minio.log 2>&1 &
-fi
-```
+具体脚本情况查[常用运维](#运维脚本)章节
 
 重新加载.bashrc文件
 
@@ -500,6 +463,72 @@ http-server --ssl --cert path/to/cert.pem --key path/to/key.pem
 npm uninstall -g http-server
 ```
 
+## rabbitmq
+
+### 安装rabbitmq
+
+```
+pkg install rabbitmq-server
+```
+
+### 安装插件
+
+查看插件列表：
+
+```
+rabbitmq-plugins list
+```
+
+web管理端插件：
+
+```
+rabbitmq-plugins enable rabbitmq_management
+```
+
+### 启动服务
+
+```
+# 终端前台运行并显示日志
+rabbitmq-server
+# 后台启动 RabbitMQ 服务，并使其脱离当前终端会话继续运行
+rabbitmq-server -detached 
+```
+
+启动后访问：http://localhost:15672，用户名密码 `guest/guest`，RabbitMQ 默认的超级用户是 guest，但该用户只能从 localhost
+登录。如果你需要远程访问 RabbitMQ，需要创建一个新的用户。
+
+默认开启的端口：
+
+- `15672`： http协议，RabbitMQ 管理插件的 Web UI 和 HTTP API，这是用于 RabbitMQ 管理界面 的端口。如果你启用了
+  rabbitmq_management 插件，就会监听这个端口。
+
+- `25672`： Clustering（集群通信），节点间通信与 CLI 工具的管理命令，这是 RabbitMQ 集群节点之间进行同步和数据交换的端口。
+
+- `5672`：AMQP（Advanced Message Queuing Protocol）通信，这是 RabbitMQ 用来接收和发送消息的 主要端口。客户端（如生产者和消费者）通过该端口与
+  RabbitMQ 进行通信。
+
+### 创建远程访问的用户
+
+```
+# 添加一个新用户（替换 username 和 password 为你自己的用户名和密码）
+rabbitmqctl add_user username password
+
+# 给新用户设置管理员权限
+rabbitmqctl set_user_tags username administrator
+
+# 设置权限（"/" 是默认 vhost）
+rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
+```
+
+### 常用命令
+
+- `rabbitmqctl status` 查看服务状态。
+- `rabbitmqctl stop` 停止服务。
+- `rabbitmqctl list_queues` 查看队列列表。
+- `rabbitmqctl list_exchanges` 查看交换机列表。
+- `rabbitmqctl list_connections` 查看连接列表。
+- `rabbitmqctl list_users` 查看用户列表。
+
 # 备份与恢复
 
 ## 备份
@@ -548,6 +577,498 @@ termux-restore /sdcard/backup.tar.xz
 
 # 常用运维
 
+## 运维脚本
+
+脚本放在.auto_startup目录下，便于同意管理
+```bash
+mkdir -p ~/.auto_startup
+touch ~/.auto_startup/start_service.sh
+touch ~/.auto_startup/stop_service.sh
+touch ~/.auto_startup/check_service.sh
+chmod +x ~/.auto_startup/start_service.sh
+chmod +x ~/.auto_startup/stop_service.sh
+chmod +x ~/.auto_startup/check_service.sh
+```
+
+### 启动服务
+
+`start_service.sh`用来启动各种服务
+
+```bash
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+LOG_DIR="$SCRIPT_DIR/log"
+mkdir -p "$LOG_DIR"
+
+# 定义服务数组
+SERVICES=(
+    "sshd"
+    "mariadb"
+    "redis"
+    "minio"
+    "rabbitmq"
+)
+
+# 启动服务的函数
+start_service() {
+    case "$1" in
+        "sshd")
+            if ! pgrep -x "sshd" >/dev/null; then
+                echo "Starting sshd"
+                sshd
+            fi
+            ;;
+        "mariadb")
+            if ! pgrep "mariadb" >/dev/null; then
+                echo "Starting mariadb"
+                nohup mariadbd-safe --datadir=$PREFIX/var/lib/mysql > "$LOG_DIR/mariadb.log" 2>&1 &
+            fi
+            ;;
+        "redis")
+            if ! pgrep "redis" >/dev/null; then
+                echo "Starting redis"
+                redis-server $PREFIX/etc/redis.conf
+            fi
+            ;;
+        "minio")
+            if ! pgrep "minio" >/dev/null; then
+                echo "Starting minio"
+                export MINIO_ROOT_USER=minioadmin
+                export MINIO_ROOT_PASSWORD=minioadmin
+                export MINIO_VOLUMES=$HOME/.minio-data
+                export MINIO_OPTS="--console-address :9001"
+                nohup minio server $MINIO_OPTS $MINIO_VOLUMES > "$LOG_DIR/minio.log" 2>&1 &
+            fi
+            ;;
+        "rabbitmq")
+            if ! pgrep "beam" >/dev/null; then
+                echo "Starting rabbitmq"
+                rabbitmq-server -detached
+            fi
+            ;;
+        *)
+            echo "Unknown service: $1"
+            ;;
+    esac
+}
+
+# 显示服务菜单
+show_menu() {
+    echo "Available services to start:" 
+    for i in "${!SERVICES[@]}"; do
+        echo "$((i + 1)). ${SERVICES[$i]}"
+    done
+    echo "Enter the number of the service to start, or 0 to start all:"
+    read -r choice
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le "${#SERVICES[@]}" ]; then
+        if [ "$choice" -eq 0 ]; then
+            # 启动所有服务
+            for SERVICE in "${SERVICES[@]}"; do
+                start_service "$SERVICE"
+            done
+        else
+            # 启动指定序号的服务
+            start_service "${SERVICES[$((choice - 1))]}"
+        fi
+    else
+        echo "Invalid choice. Exiting."
+    fi
+}
+
+# 检查是否传入参数
+if [ "$#" -eq 0 ]; then
+    # 没有参数时，显示菜单
+    show_menu
+elif [ "$1" == "all" ]; then
+    # 参数为 "all" 时，启动所有服务
+    for SERVICE in "${SERVICES[@]}"; do
+        start_service "$SERVICE"
+    done
+else
+    # 有参数时，只启动指定的服务
+    for SERVICE in "$@"; do
+        start_service "$SERVICE"
+    done
+fi
+```
+
+使用方法：
+
+```bash
+# 进入可选服务选项
+./start_service.sh
+# 启动指定服务
+./start_service.sh redis minio
+# 启动所有服务
+./start_service.sh all
+```
+
+如果为脚本配置了别名，可以直接使用别名启动服务，如在~/.alias中添加了[别名](#别名)：
+
+```bash
+# 进入可选服务选项
+sas
+# 启动指定服务
+sas redis minio
+# 启动所有服务
+sas all
+```
+
+### 停止服务
+
+`stop_service.sh`用来停止各种服务
+
+```bash
+
+# 定义服务数组
+SERVICES=(
+    "mariadb"
+    "redis"
+    "minio"
+    "rabbitmq"
+)
+
+# 停止服务的函数
+stop_service() {
+    case "$1" in
+        "mariadb")
+            if pgrep "mariadb" > /dev/null; then
+                echo "Stopping mariadb"
+                pkill mariadbd
+                sleep 1
+                if ! pgrep "mariadb" > /dev/null; then
+                    echo "mariadb is closed"
+                fi
+            else
+                echo "mariadb is not running"
+            fi
+            ;;
+        "redis")
+            if pgrep "redis" > /dev/null; then
+                echo "Stopping redis"
+                pkill redis-server
+                sleep 1
+                if ! pgrep "redis" > /dev/null; then
+                    echo "redis is closed"
+                fi
+            else
+                echo "redis is not running"
+            fi
+            ;;
+        "minio")
+            if pgrep "minio" > /dev/null; then
+                echo "Stopping minio"
+                pkill minio
+                sleep 1
+                if ! pgrep "minio" > /dev/null; then
+                    echo "minio is closed"
+                fi
+            else
+                echo "minio is not running"
+            fi
+            ;;
+        "rabbitmq")
+            if pgrep "beam" > /dev/null; then
+                echo "Stopping rabbitmq"
+                rabbitmqctl stop
+                sleep 3
+                if ! pgrep "beam" > /dev/null; then
+                    echo "rabbitmq is closed"
+                fi
+            else
+                echo "rabbitmq is not running"
+            fi
+            ;;
+        *)
+            echo "Unknown service: $1"
+            ;;
+    esac
+}
+
+# 显示服务菜单
+show_menu() {
+    echo "Available services to stop:" 
+    for i in "${!SERVICES[@]}"; do
+        echo "$((i + 1)). ${SERVICES[$i]}"
+    done
+    echo "Enter the number of the service to stop, or 0 to stop all:"
+    read -r choice
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le "${#SERVICES[@]}" ]; then
+        if [ "$choice" -eq 0 ]; then
+            # 停止所有服务
+            for SERVICE in "${SERVICES[@]}"; do
+                stop_service "$SERVICE"
+            done
+        else
+            # 停止指定序号的服务
+            stop_service "${SERVICES[$((choice - 1))]}"
+        fi
+    else
+        echo "Invalid choice. Exiting."
+    fi
+}
+
+# 检查是否传入参数
+if [ "$#" -eq 0 ]; then
+    # 没有参数时，显示菜单
+    show_menu
+elif [ "$1" == "all" ]; then
+    # 参数为 "all" 时，停止所有服务
+    for SERVICE in "${SERVICES[@]}"; do
+        stop_service "$SERVICE"
+    done
+else
+    # 有参数时，只停止指定的服务
+    for SERVICE in "$@"; do
+        stop_service "$SERVICE"
+    done
+fi
+````
+
+使用方法：
+
+```bash
+# 进入可选服务选项
+./stop_service.sh
+# 停止指定服务
+./stop_service.sh redis minio
+# 停止所有服务
+./stop_service.sh all
+```
+
+如果为脚本配置了别名，可以直接使用别名启动服务，如在~/.alias中添加了[别名](#别名)：
+
+```bash
+# 进入可选服务选项
+sos
+# 停止指定服务
+sos redis minio
+# 停止所有服务
+sos all
+```
+
+### 检查服务状态
+
+`check_service.sh`用来检查各种服务的状态
+
+```bash
+#!/bin/bash
+
+# 定义服务数组
+SERVICES=(
+    "mariadb"
+    "redis"
+    "minio"
+    "rabbitmq"
+)
+
+# 停止服务的函数
+stop_service() {
+    case "$1" in
+        "mariadb")
+            if pgrep "mariadb" > /dev/null; then
+                echo "Stopping mariadb"
+                pkill mariadbd
+                sleep 1
+                if ! pgrep "mariadb" > /dev/null; then
+                    echo "mariadb is closed"
+                fi
+            else
+                echo "mariadb is not running"
+            fi
+            ;;
+        "redis")
+            if pgrep "redis" > /dev/null; then
+                echo "Stopping redis"
+                pkill redis-server
+                sleep 1
+                if ! pgrep "redis" > /dev/null; then
+                    echo "redis is closed"
+                fi
+            else
+                echo "redis is not running"
+            fi
+            ;;
+        "minio")
+            if pgrep "minio" > /dev/null; then
+                echo "Stopping minio"
+                pkill minio
+                sleep 1
+                if ! pgrep "minio" > /dev/null; then
+                    echo "minio is closed"
+                fi
+            else
+                echo "minio is not running"
+            fi
+            ;;
+        "rabbitmq")
+            if pgrep "beam" > /dev/null; then
+                echo "Stopping rabbitmq"
+                rabbitmqctl stop
+                sleep 3
+                if ! pgrep "beam" > /dev/null; then
+                    echo "rabbitmq is closed"
+                fi
+            else
+                echo "rabbitmq is not running"
+            fi
+            ;;
+        *)
+            echo "Unknown service: $1"
+            ;;
+    esac
+}
+
+# 显示服务菜单
+show_menu() {
+    echo "Available services to stop:" 
+    for i in "${!SERVICES[@]}"; do
+        echo "$((i + 1)). ${SERVICES[$i]}"
+    done
+    echo "Enter the number of the service to stop, or 0 to stop all:"
+    read -r choice
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le "${#SERVICES[@]}" ]; then
+        if [ "$choice" -eq 0 ]; then
+            # 停止所有服务
+            for SERVICE in "${SERVICES[@]}"; do
+                stop_service "$SERVICE"
+            done
+        else
+            # 停止指定序号的服务
+            stop_service "${SERVICES[$((choice - 1))]}"
+        fi
+    else
+        echo "Invalid choice. Exiting."
+    fi
+}
+
+# 检查是否传入参数
+if [ "$#" -eq 0 ]; then
+    # 没有参数时，显示菜单
+    show_menu
+elif [ "$1" == "all" ]; then
+    # 参数为 "all" 时，停止所有服务
+    for SERVICE in "${SERVICES[@]}"; do
+        stop_service "$SERVICE"
+    done
+else
+    # 有参数时，只停止指定的服务
+    for SERVICE in "$@"; do
+        stop_service "$SERVICE"
+    done
+fi
+
+~ $ cat .auto_startup/check_service.sh 
+#!/bin/bash
+
+# 定义服务及其相关端口的数组
+# 格式：服务名:端口1,端口2,...
+SERVICES_PORTS=(
+    "mariadb:3306"
+    "minio:9000,9001"
+    "rabbitmq:5672,15672,25672"
+    "redis:6379"
+    "sshd:8022"
+)
+
+# 定义颜色
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+BOLD="\033[1m"
+RESET="\033[0m"
+
+# 计算对齐宽度
+ALIGN_WIDTH=$(printf "%s\n" "${SERVICES_PORTS[@]}" | cut -d: -f1 | awk '{ if (length > max) max = length } END { print max }')
+
+# 检查服务端口状态的函数
+check_service() {
+    local service="$1"
+    local ports="$2"
+    local is_running=0
+    local open_ports=()
+    local closed_ports=()
+
+    # 遍历所有端口
+    for port in $(echo "$ports" | tr "," " "); do
+        nc -z localhost "$port" > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            open_ports+=("$port")
+            is_running=1
+        else
+            closed_ports+=("$port")
+        fi
+    done
+
+    # 输出服务信息
+    if [ $is_running -eq 1 ]; then
+        # 打印开放的端口和关闭的端口（绿色和红色区分）
+        printf "%b%-${ALIGN_WIDTH}s%b is %brunning%b at %b%s%b %s\n" \
+            "$BOLD" "$service" "$RESET" "$GREEN" "$RESET" \
+            "$GREEN" "$(IFS=","; echo "${open_ports[*]}")" "$RESET" \
+            "$(IFS=","; echo "${closed_ports[*]}")"
+    else
+        # 服务关闭，打印所有端口（红色）
+        printf "%b%-${ALIGN_WIDTH}s%b is %bclosed%b. (%b%s%b)\n" \
+            "$BOLD" "$service" "$RESET" "$RED" "$RESET" \
+            "$RED" "$(IFS=","; echo "${ports[*]}")" "$RESET"
+    fi
+}
+
+# 检查所有服务
+default_check_all() {
+    for entry in "${SERVICES_PORTS[@]}"; do
+        service=$(echo "$entry" | cut -d: -f1)
+        ports=$(echo "$entry" | cut -d: -f2)
+        check_service "$service" "$ports"
+    done
+}
+
+# 检查是否传入参数
+if [ "$#" -eq 0 ]; then
+    # 没有参数时，检查所有服务
+    default_check_all
+else
+    # 有参数时，只检查指定的服务
+    for arg in "$@"; do
+        found=0
+        for entry in "${SERVICES_PORTS[@]}"; do
+            service=$(echo "$entry" | cut -d: -f1)
+            ports=$(echo "$entry" | cut -d: -f2)
+            if [ "$arg" == "$service" ]; then
+                check_service "$service" "$ports"
+                found=1
+                break
+            fi
+        done
+        if [ $found -eq 0 ]; then
+            echo "Service $arg not found in the defined list."
+        fi
+    done
+fi
+```
+
+使用方法：
+
+```bash
+# 显示所有服务状态
+./check_service.sh
+# 显示指定服务状态
+./check_service.sh redis minio
+```
+
+如果为脚本配置了别名，可以直接使用别名启动服务，如在~/.alias中添加了[别名](#别名)：
+
+```bash
+# 显示所有服务状态
+cs
+# 显示指定服务状态
+cs redis minio
+```
+
 ## 开启传统Linux文件布局
 
 > 前提：已安装`proot`
@@ -560,6 +1081,20 @@ ls /
 ```
 
 ## 查询开放的端口
+
+安装了`netcat`后，可以使用`nc`命令来查询开放的端口：
+
+```bash
+# 查看指定的端口
+nc -zv 127.0.0.1 8080
+# 查看所有指定范围的端口
+nc -zv 127.0.0.1 1-8080
+```
+
+常用参数：
+
+- `-z`：只测试端口是否打开，不进行数据传输
+- `-v`：显示详细信息
 
 # 终端设置
 
@@ -602,4 +1137,3 @@ use-fullscreen-workaround=true
 ```properties
 enforce-char-based-input=true
 ```
-
