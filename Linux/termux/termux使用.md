@@ -351,6 +351,59 @@ rm -rf $PREFIX/var/lib/mysql
 rm -rf $PREFIX/etc/my.cnf
 ```
 
+## redis
+
+### 安装redis
+```
+pkg install redis
+```
+
+### 修改配置
+
+新建数据保存的目录：
+```
+mkdir -p $PREFIX/var/lib/redis
+```
+
+编辑配置文件：
+```
+vim $PREFIX/etc/redis.conf
+```
+
+修改文件里面的内容：
+```
+# 设置中用户名密码
+requirepass 123456
+# 开启AOF持久化
+appendonly yes
+# 数据保存的位置，刚才新建的地址
+dir /data/data/com.termux/files/usr/var/lib/redis
+```
+
+### 启动redis
+
+```
+redis-server $PREFIX/etc/redis.conf
+```
+
+### 停止redis
+
+需要加上密码
+```
+redis-cli -a redis@123 shutdown
+# 或者杀掉进程
+pkill redis-server
+```
+
+### 卸载redis
+
+```
+pkill redis-server
+pkg uninstall redis
+rm -rf $PREFIX/var/lib/redis
+rm -rf $PREFIX/etc/redis.conf
+```
+
 ## minio
 
 > minio 是AI数据基础设施的对象存储。
@@ -484,7 +537,7 @@ rabbitmq-plugins list
 web管理端插件：
 
 ```
-rabbitmq-plugins enable rabbitmq_management
+rabbitmq-plugins enable rabbitmq_management --offline
 ```
 
 #### rabbitmq_delayed_message_exchange
@@ -496,30 +549,32 @@ rabbitmq-plugins enable rabbitmq_management
 [插件GitHub](https://github.com/rabbitmq/rabbitmq-delayed-message-exchange)
 
 下载rabbitmq_delayed_message_exchange
+
 ```bash
 wget -P $(rabbitmq-plugins directories | grep 'Plugin archives directory' | awk '{print $NF}') https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.0.2/rabbitmq_delayed_message_exchange-4.0.2.ez
 ```
 
 启用插件
-```
-rabbitmq-plugins enable rabbitmq_delayed_message_exchange && rabbitmq-plugins list
-```
 
-
+```
+rabbitmq-plugins enable rabbitmq_delayed_message_exchange --offline && rabbitmq-plugins list
+```
 
 ### 启动所有稳定特性标志
+
 稳定特性标志子系统是为了允许在不关闭整个集群的情况下 **[滚动升级](https://www.rabbitmq.com/docs/feature-flags)** 集群成员。
 
 列出功能标志:
+
 ```
 rabbitmqctl list_feature_flags
 ```
 
 要启用所有稳定特性标志，请使用：
+
 ```
 rabbitmqctl enable_feature_flag all
 ```
-
 
 ### 启动服务
 
@@ -564,6 +619,21 @@ rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
 - `rabbitmqctl list_exchanges` 查看交换机列表。
 - `rabbitmqctl list_connections` 查看连接列表。
 - `rabbitmqctl list_users` 查看用户列表。
+
+### 升级
+
+在使用`pkg upgrade`进行升级的时候发现，rabbitmq没有把安装的插件和启用的插件开启，需要手动复制（安装）
+插件到插件的目录里面。
+
+自己安装的插件可以手动复制到最新的应用目录下。
+
+需要开启的插件建议写在`rabbitmq-plugins directories`指定的`Enabled plugins file: /data/data/com.termux/files/usr/etc/rabbitmq/enabled_plugins`
+文件中，这样就不需要升级的时候再enable插件。或者在安装插件的时候加上`--offline`参数，这是同样在操作开启的插件列表文件。
+
+如下示例：
+```
+[rabbitmq_management,rabbitmq_delayed_message_exchange].
+```
 
 # 备份与恢复
 
@@ -616,6 +686,7 @@ termux-restore /sdcard/backup.tar.xz
 ## 运维脚本
 
 脚本放在.auto_startup目录下，便于同意管理
+
 ```bash
 mkdir -p ~/.auto_startup
 touch ~/.auto_startup/start_service.sh
