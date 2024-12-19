@@ -479,11 +479,47 @@ pkg install rabbitmq-server
 rabbitmq-plugins list
 ```
 
+#### rabbitmq_management
+
 web管理端插件：
 
 ```
 rabbitmq-plugins enable rabbitmq_management
 ```
+
+#### rabbitmq_delayed_message_exchange
+
+> 该插件可以创建延迟交换机，消息在达到指定延迟时间后才会发送到指定的队列中。
+
+[Rabbit plugins](https://www.rabbitmq.com/community-plugins.html)
+
+[插件GitHub](https://github.com/rabbitmq/rabbitmq-delayed-message-exchange)
+
+下载rabbitmq_delayed_message_exchange
+```bash
+wget -P $(rabbitmq-plugins directories | grep 'Plugin archives directory' | awk '{print $NF}') https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.0.2/rabbitmq_delayed_message_exchange-4.0.2.ez
+```
+
+启用插件
+```
+rabbitmq-plugins enable rabbitmq_delayed_message_exchange && rabbitmq-plugins list
+```
+
+
+
+### 启动所有稳定特性标志
+稳定特性标志子系统是为了允许在不关闭整个集群的情况下 **[滚动升级](https://www.rabbitmq.com/docs/feature-flags)** 集群成员。
+
+列出功能标志:
+```
+rabbitmqctl list_feature_flags
+```
+
+要启用所有稳定特性标志，请使用：
+```
+rabbitmqctl enable_feature_flag all
+```
+
 
 ### 启动服务
 
