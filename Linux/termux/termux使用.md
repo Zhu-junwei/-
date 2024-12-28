@@ -63,11 +63,17 @@ if [ -f ~/.alias ]; then
 fi
 # LANG=zh_CN.UTF-8
 # LANGUAGE=zh_CN.UTF-8
+# 获取设备名称
+device_name=$(getprop ro.product.marketname)
+if [ -z "$device_name" ]; then
+    device_name=$(getprop net.hostname)
+fi
+echo "设备: $device_name"
 echo "欢迎: "$(whoami)
 echo "时间:" `date "+%Y-%m-%d %H:%M"`
 echo -e "IP  :\e[33m" `ifconfig|grep 'inet'|cut -d ' ' -f 10|grep -v '127.0.0.1'` "\e[0m"
 
-# 启动所有的服务，根据自己化境情况设置
+# 启动所有的服务
 sas all
 
 # 检查服务的运行状态
@@ -354,6 +360,7 @@ rm -rf $PREFIX/etc/my.cnf
 ## redis
 
 ### 安装redis
+
 ```
 pkg install redis
 ```
@@ -361,16 +368,19 @@ pkg install redis
 ### 修改配置
 
 新建数据保存的目录：
+
 ```
 mkdir -p $PREFIX/var/lib/redis
 ```
 
 编辑配置文件：
+
 ```
 vim $PREFIX/etc/redis.conf
 ```
 
 修改文件里面的内容：
+
 ```
 # 设置中用户名密码
 requirepass 123456
@@ -389,6 +399,7 @@ redis-server $PREFIX/etc/redis.conf
 ### 停止redis
 
 需要加上密码
+
 ```
 redis-cli -a redis@123 shutdown
 # 或者杀掉进程
@@ -440,6 +451,35 @@ fi
 
 ```bash
 source ~/.bashrc
+```
+
+## nginx
+
+### 简介
+
+> nginx（" engine x "）是一个 HTTP Web 服务器、反向代理、内容缓存、负载均衡器、TCP/UDP 代理服务器和邮件代理服务器。
+
+### 安装nginx
+
+```
+pkg install nginx
+```
+
+配置文件所在路径：`$PREFIX/etc/nginx/nginx.conf`
+
+### 启动nginx
+
+```
+nginx
+```
+
+### 停止nginx
+
+```
+# 强行停止
+nginx -s stop
+# 或者使用quit，优雅停止
+nginx -s quit
 ```
 
 ## http-server
@@ -627,10 +667,12 @@ rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
 
 自己安装的插件可以手动复制到最新的应用目录下。
 
-需要开启的插件建议写在`rabbitmq-plugins directories`指定的`Enabled plugins file: /data/data/com.termux/files/usr/etc/rabbitmq/enabled_plugins`
+需要开启的插件建议写在`rabbitmq-plugins directories`指定的
+`Enabled plugins file: /data/data/com.termux/files/usr/etc/rabbitmq/enabled_plugins`
 文件中，这样就不需要升级的时候再enable插件。或者在安装插件的时候加上`--offline`参数，这是同样在操作开启的插件列表文件。
 
 如下示例：
+
 ```
 [rabbitmq_management,rabbitmq_delayed_message_exchange].
 ```
@@ -933,11 +975,11 @@ else
         stop_service "$SERVICE"
     done
 fi
-````
+​````
 
 使用方法：
 
-```bash
+​```bash
 # 进入可选服务选项
 ./stop_service.sh
 # 停止指定服务
@@ -1202,6 +1244,18 @@ nc -zv 127.0.0.1 1-8080
 
 - `-z`：只测试端口是否打开，不进行数据传输
 - `-v`：显示详细信息
+
+## 查看进程占用端口
+
+```
+ps -auxf
+```
+
+## 杀掉一个进程
+
+```
+pkill -9 <PID>
+```
 
 # 终端设置
 

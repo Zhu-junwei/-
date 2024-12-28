@@ -176,7 +176,7 @@ idea.log.path=${idea.system.path}/log
 
 # 插件
 
-## 安装显示类注释插件(可选)
+## Show Comment
 
 > 文件树中显示类的注释，前提在类的开头写好了javadoc注释
 
@@ -186,46 +186,63 @@ idea.log.path=${idea.system.path}/log
 
 ![20220608_135754.png](img/20220608_135754.png)
 
-## diagrams.net 插件
+## diagrams.net
 
 > draw.io画图工具包
 
-## Chinese Language Pack 插件
+## Chinese Language Pack
 
 > 将idea翻译为中文
 
-## CMD Support 插件
+## CMD Support
 
 > CMD命令高亮支持
 
-## Gitee 插件
+## Gitee
 
 > 写过的代码要提交云端
 
-## GsonFormatPlus 插件
+## GsonFormatPlus
 
 > json开发工具
 
-## Key Promoter X 插件
+## Key Promoter X
 
 > 使用idea的快捷键提示
 
-## Maven Helper 插件
+## Maven Helper
 
 > Maven工具
 
-## Translation 插件
+## Translation
 
 > 直接在idea里面翻译英文不香吗
 
-## ignore插件
+## ignore
+
+> 忽略文件
 
 ## 主题插件
 
 - Xcode Dark theme
 - Visual Studio Code "Dark Plus" theme
 
+## Atom Material ICons
+
+> 自定义文件和IDE图标，用于改进视觉绘制
+
+## Rainbow Brackets Lite
+
+> 彩虹括号，提高代码可读性
+
+## MybatisPlus
+
+> MybatisPlus插件从java到xml或从xml到java
+
+## CodeGlance
+
+> 代码缩略图
+
 # 激活
 
-百度
-
+https://wwqn.lanzoul.com/iT0Yr2i3cv4b
