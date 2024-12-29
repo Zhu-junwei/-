@@ -62,8 +62,8 @@ alias vi='vim'
 if [ -f ~/.alias ]; then
         . ~/.alias
 fi
-# LANG=zh_CN.UTF-8
-# LANGUAGE=zh_CN.UTF-8
+LANG=zh_CN.UTF-8
+LANGUAGE=zh_CN.UTF-8
 # 获取设备名称
 device_name=$(getprop ro.product.marketname)
 if [ -z "$device_name" ]; then
@@ -384,7 +384,7 @@ vim $PREFIX/etc/redis.conf
 
 ```
 # 设置中用户名密码
-requirepass 123456
+requirepass redis@123
 # 开启AOF持久化
 appendonly yes
 # 数据保存的位置，刚才新建的地址
@@ -778,7 +778,7 @@ start_service() {
         "redis")
             if ! pgrep "redis" >/dev/null; then
                 echo "Starting redis"
-                redis-server $PREFIX/etc/redis.conf
+                nohup redis-server $PREFIX/etc/redis.conf > "$LOG_DIR/redis.log" 2>&1 &
             fi
             ;;
         "minio")
@@ -1007,114 +1007,6 @@ sos all
 ```bash
 #!/bin/bash
 
-# 定义服务数组
-SERVICES=(
-    "mariadb"
-    "redis"
-    "minio"
-    "rabbitmq"
-)
-
-# 停止服务的函数
-stop_service() {
-    case "$1" in
-        "mariadb")
-            if pgrep "mariadb" > /dev/null; then
-                echo "Stopping mariadb"
-                pkill mariadbd
-                sleep 1
-                if ! pgrep "mariadb" > /dev/null; then
-                    echo "mariadb is closed"
-                fi
-            else
-                echo "mariadb is not running"
-            fi
-            ;;
-        "redis")
-            if pgrep "redis" > /dev/null; then
-                echo "Stopping redis"
-                pkill redis-server
-                sleep 1
-                if ! pgrep "redis" > /dev/null; then
-                    echo "redis is closed"
-                fi
-            else
-                echo "redis is not running"
-            fi
-            ;;
-        "minio")
-            if pgrep "minio" > /dev/null; then
-                echo "Stopping minio"
-                pkill minio
-                sleep 1
-                if ! pgrep "minio" > /dev/null; then
-                    echo "minio is closed"
-                fi
-            else
-                echo "minio is not running"
-            fi
-            ;;
-        "rabbitmq")
-            if pgrep "beam" > /dev/null; then
-                echo "Stopping rabbitmq"
-                rabbitmqctl stop
-                sleep 3
-                if ! pgrep "beam" > /dev/null; then
-                    echo "rabbitmq is closed"
-                fi
-            else
-                echo "rabbitmq is not running"
-            fi
-            ;;
-        *)
-            echo "Unknown service: $1"
-            ;;
-    esac
-}
-
-# 显示服务菜单
-show_menu() {
-    echo "Available services to stop:" 
-    for i in "${!SERVICES[@]}"; do
-        echo "$((i + 1)). ${SERVICES[$i]}"
-    done
-    echo "Enter the number of the service to stop, or 0 to stop all:"
-    read -r choice
-
-    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le "${#SERVICES[@]}" ]; then
-        if [ "$choice" -eq 0 ]; then
-            # 停止所有服务
-            for SERVICE in "${SERVICES[@]}"; do
-                stop_service "$SERVICE"
-            done
-        else
-            # 停止指定序号的服务
-            stop_service "${SERVICES[$((choice - 1))]}"
-        fi
-    else
-        echo "Invalid choice. Exiting."
-    fi
-}
-
-# 检查是否传入参数
-if [ "$#" -eq 0 ]; then
-    # 没有参数时，显示菜单
-    show_menu
-elif [ "$1" == "all" ]; then
-    # 参数为 "all" 时，停止所有服务
-    for SERVICE in "${SERVICES[@]}"; do
-        stop_service "$SERVICE"
-    done
-else
-    # 有参数时，只停止指定的服务
-    for SERVICE in "$@"; do
-        stop_service "$SERVICE"
-    done
-fi
-
-~ $ cat .auto_startup/check_service.sh 
-#!/bin/bash
-
 # 定义服务及其相关端口的数组
 # 格式：服务名:端口1,端口2,...
 SERVICES_PORTS=(
@@ -1125,6 +1017,23 @@ SERVICES_PORTS=(
     "sshd:8022"
 )
 
+# 从 nginx.conf 提取端口，过滤掉注释行
+extract_nginx_ports() {
+    local nginx_conf=$PREFIX/etc/nginx/nginx.conf  # 修改为你的 nginx.conf 路径
+    local ports=()
+    if [ -f "$nginx_conf" ]; then
+        ports=$(grep -Eo '^\s*listen[[:space:]]+[0-9]+' "$nginx_conf" | awk '{print $2}' | sort -u | tr '\n' ',')
+        ports="${ports%,}"  # 移除末尾多余的逗号
+    fi
+    echo "$ports"
+}
+
+# 添加 Nginx 的端口到服务列表
+nginx_ports=$(extract_nginx_ports)
+if [ -n "$nginx_ports" ]; then
+    SERVICES_PORTS+=("nginx:$nginx_ports")
+fi
+
 # 定义颜色
 GREEN="\033[0;32m"
 RED="\033[0;31m"
@@ -1134,10 +1043,43 @@ RESET="\033[0m"
 # 计算对齐宽度
 ALIGN_WIDTH=$(printf "%s\n" "${SERVICES_PORTS[@]}" | cut -d: -f1 | awk '{ if (length > max) max = length } END { print max }')
 
+# 检查服务是否已安装
+is_service_installed() {
+    case "$1" in
+        "mariadb")
+            command -v mariadbd >/dev/null 2>&1
+            ;;
+        "minio")
+            command -v minio >/dev/null 2>&1
+            ;;
+        "rabbitmq")
+            command -v rabbitmq-server >/dev/null 2>&1
+            ;;
+        "redis")
+            command -v redis-server >/dev/null 2>&1
+            ;;
+        "sshd")
+            command -v sshd >/dev/null 2>&1
+            ;;
+        "nginx")
+            command -v nginx >/dev/null 2>&1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 # 检查服务端口状态的函数
 check_service() {
     local service="$1"
     local ports="$2"
+
+    # 跳过未安装的服务
+    if ! is_service_installed "$service"; then
+        return
+    fi
+
     local is_running=0
     local open_ports=()
     local closed_ports=()
