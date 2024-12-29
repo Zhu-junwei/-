@@ -45,14 +45,15 @@ pkg install vim openssh curl wget sl tree nmap netcat-openbsd root-repo openjdk-
 编辑~/.alias文件
 
 ```shell
-alias vi='vim'
-alias ll='ls -l'
+alias cs='~/.auto_startup/check_service.sh'
+alias debian='proot-distro login debian'
 alias grep='grep --color=auto'
 alias ifconfig='ifconfig 2>/dev/null'
-alias debian='proot-distro login debian'
-alias sas='./.auto_startup/start_service.sh'
-alias sos='./.auto_startup/stop_service.sh'
-alias cs='./.auto_startup/check_service.sh'
+alias ll='ls -lh'
+alias log='cat ~/shell/service_log.properties'
+alias sas='~/.auto_startup/start_service.sh'
+alias sos='~/.auto_startup/stop_service.sh'
+alias vi='vim'
 ```
 
 编辑~/.bashrc文件
