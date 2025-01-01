@@ -37,7 +37,7 @@ deb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main
 ## 安装常用软件
 
 ```shell
-pkg install vim openssh curl wget sl tree nmap netcat-openbsd root-repo openjdk-17 x11-repo termux-exec termux-services proot -y
+pkg install vim openssh curl wget sl tree nmap netcat-openbsd root-repo openjdk-17 x11-repo termux-exec termux-services proot git python nodejs -y
 ```
 
 ## 别名
@@ -678,6 +678,66 @@ rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
 [rabbitmq_management,rabbitmq_delayed_message_exchange].
 ```
 
+## Lazymux
+
+> [Lazymux]([Gameye98/Lazymux：termux 工具安装程序 --- Gameye98/Lazymux: termux tool installer](https://github.com/Gameye98/Lazymux)) 是一款帮助您在 Android 系统上轻松安装和使用多种渗透测试和黑客工具的工具。它允许用户轻松安装和使用各种流行的工具，例如Nmap、SQLMap和Metasploit。该工具使用起来很简单，因为您只需键入命令即可安装和使用任何工具。 Lazymux 是一个开源项目，对于渗透测试和道德黑客任务来说是一个非常有用的工具。
+
+
+
+要求
+
+• Python 3.x 
+
+### 安装Lazymux
+
+```
+mkdir -p ~/app/Lazymux
+cd ~/app/Lazymux
+git clone https://github.com/Gameye98/Lazymux
+cd Lazymux
+python lazymux.py
+```
+
+### 功能
+
+```
+ _
+( )
+| |       _ _  ____  _   _   ___ ___   _   _
+| |  _  /'_` )(_  ,)( ) ( )/' _ ` _ `\( ) ( )(`\/')
+| |_( )( (_| | /'/_ | (_) || ( ) ( ) || (_) | >  <
+(____/'`\__,_)(____)`\__, |(_) (_) (_)`\___/'(_/\_)
+                    ( )_| |
+                    `\___/'
+
+   [01] Information Gathering
+   [02] Vulnerability Analysis
+   [03] Web Hacking
+   [04] Database Assessment
+   [05] Password Attacks
+   [06] Wireless Attacks
+   [07] Reverse Engineering
+   [08] Exploitation Tools
+   [09] Sniffing and Spoofing
+   [10] Reporting Tools
+   [11] Forensic Tools
+   [12] Stress Testing
+   [13] Install Linux Distro
+   [14] Termux Utility
+   [15] Shell Function [.bashrc]
+   [16] Install CLI Games
+   [17] Malware Analysis
+   [18] Compiler/Interpreter
+   [19] Social Engineering Tools
+
+   [99] Update the Lazymux
+   [00] Exit the Lazymux
+
+lzmx > set_install 
+```
+
+
+
 # 备份与恢复
 
 ## 备份
@@ -1022,7 +1082,7 @@ extract_nginx_ports() {
     local nginx_conf=$PREFIX/etc/nginx/nginx.conf  # 修改为你的 nginx.conf 路径
     local ports=()
     if [ -f "$nginx_conf" ]; then
-        ports=$(grep -Eo '^\s*listen[[:space:]]+[0-9]+' "$nginx_conf" | awk '{print $2}' | sort -u | tr '\n' ',')
+        ports=$(nginx -T 2>/dev/null | grep -Eo '^\s*listen[[:space:]]+[0-9]+'| awk '{print $2}' | sort -u | tr '\n' ',')
         ports="${ports%,}"  # 移除末尾多余的逗号
     fi
     echo "$ports"
@@ -1236,7 +1296,7 @@ use-fullscreen-workaround=true
 
 ## 键盘输入问题
 
-> 我的手机在使用英文输入时，需要进行单词候选才能把命令输入到终端中，这与平时的终端使用不太一直，可以修改如下配置
+> 手机在使用英文输入时，需要进行单词候选才能把命令输入到终端中，这与平时的终端使用不太一致，可以修改如下配置
 
 ```properties
 enforce-char-based-input=true
