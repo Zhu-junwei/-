@@ -1,10 +1,14 @@
 [TOC]
 
-# 1 切换镜像
+# Termux使用指南
+
+# 基础配置
+
+## 切换镜像
 
 参考 : https://mirrors.tuna.tsinghua.edu.cn/help/termux/
 
-## 图形界面（TUI）替换
+### 图形界面（TUI）替换
 
 在较新版的 Termux 中，官方提供了图形界面（TUI）来半自动替换镜像，推荐使用该种方式以规避其他风险。 在 Termux 中执行如下命令
 
@@ -15,14 +19,14 @@ termux-change-repo
 在图形界面引导下，使用自带方向键可上下移动。
 第一步使用空格选择需要更换的仓库，之后在第二步选择 TUNA/BFSU 镜像源。确认无误后回车，镜像源会自动完成更换。
 
-## 命令行替换
+### 命令行替换
 
 ```shell
 sed -i 's@^\(deb.*stable main\)$@#\1\ndeb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main@' $PREFIX/etc/apt/sources.list
 apt update && apt upgrade
 ```
 
-## 手动修改
+### 手动修改
 
 编辑 $PREFIX/etc/apt/sources.list 修改为如下内容
 
@@ -40,35 +44,51 @@ deb https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main stable main
 pkg install vim openssh curl wget sl tree nmap netcat-openbsd root-repo openjdk-17 x11-repo termux-exec termux-services proot git python nodejs -y
 ```
 
-## 别名
+## 设置别名
 
 编辑~/.alias文件
 
 ```shell
-alias cs='~/.auto_startup/check_service.sh'
-alias debian='proot-distro login debian'
+alias vi='vim'
+alias py='python'
+alias py2='python2'
+alias ll='ls -lh'
 alias grep='grep --color=auto'
 alias ifconfig='ifconfig 2>/dev/null'
-alias ll='ls -lh'
+alias ip='ifconfig 2>/dev/null'
+alias debian='proot-distro login debian'
 alias log='cat ~/shell/service_log.properties'
 alias sas='~/.auto_startup/start_service.sh'
 alias sos='~/.auto_startup/stop_service.sh'
-alias vi='vim'
 ```
+
+## 设置.bashrc
 
 编辑~/.bashrc文件
 
 ```shell
+# 获取唤醒锁
+termux-wake-lock
+
+# 定义别名
 if [ -f ~/.alias ]; then
-        . ~/.alias
+	. ~/.alias
 fi
+
+# 设置语系
 LANG=zh_CN.UTF-8
 LANGUAGE=zh_CN.UTF-8
+
+# 设置服务的端口
+export KODBOX_PORT=9100
+
 # 获取设备名称
 device_name=$(getprop ro.product.marketname)
 if [ -z "$device_name" ]; then
     device_name=$(getprop net.hostname)
 fi
+
+# 打印登录信息
 echo "设备: $device_name"
 echo "欢迎: "$(whoami)
 echo "时间:" `date "+%Y-%m-%d %H:%M"`
@@ -79,6 +99,12 @@ sas all
 
 # 检查服务的运行状态
 # cs
+
+quikfind(){
+# Usage: quikfind
+read -p "Enter Filename: " filename
+find /sdcard/ | grep ${filename}
+}
 ```
 
 具体脚本情况查[常用运维](#运维脚本)章节
@@ -89,13 +115,13 @@ sas all
 source ~/.bashrc
 ```
 
-# 2、通过电脑连接手机termux
+## 通过电脑连接手机termux
 
-## 方式1
+### 方式1
 
 通过passwd命令设置用户的密码
 
-## 方式2
+### 方式2
 
 一、电脑端操作
 
@@ -244,9 +270,11 @@ nh kex stop
 
 # 常用软件
 
-## ngrok内网传透
+## ngrok
 
-下载二进制文件
+> 内网传透工具
+
+### 下载二进制文件
 
 ```bash
 wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
@@ -254,13 +282,13 @@ wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
 
 > 如果版本有变，需要到[ngrok官网](https://ngrok.com/download)下载。
 
-解压
+### 解压
 
 ```bash
 tar xvzf ngrok-v3-stable-linux-arm64.tgz -C $PREFIX/bin/
 ```
 
-令牌
+### 令牌
 
 > [注册](https://dashboard.ngrok.com/signup)一个 Ngrok
 > 账户，并获取你的[身份验证令牌](https://dashboard.ngrok.com/get-started/your-authtoken)（auth token）。
@@ -269,7 +297,7 @@ tar xvzf ngrok-v3-stable-linux-arm64.tgz -C $PREFIX/bin/
 ngrok config add-authtoken xxxxxxxx(your authtoken)
 ```
 
-启动 Ngrok
+### 启动 Ngrok
 
 在`termux-chroot`下启动`ngrok`
 ，不知道为什么，我有次无法直接使用ngrok.[参考](https://www.reddit.com/r/termux/comments/18wnjoi/using_ngrok_on_termux/?rdt=40538)
@@ -557,6 +585,105 @@ http-server --ssl --cert path/to/cert.pem --key path/to/key.pem
 npm uninstall -g http-server
 ```
 
+## kodbox
+
+>  kodbox（一个轻量级文件管理器）
+
+### 安装kodbox
+
+安装必要的依赖
+
+```
+pkg install php curl unzip wget -y
+```
+
+从 kodbox 官方网站或 GitHub 下载最新的安装包：
+
+```
+mkdir ~/app/
+cd ~/app/
+wget https://github.com/kalcaddle/kodbox/archive/refs/heads/master.zip -O kodbox.zip
+```
+
+解压安装包
+
+```
+unzip kodbox.zip
+mv kodbox-main kodbox
+```
+
+### 启动kodbox
+
+Termux 本身没有完整的 Web 服务器，但我们可以用 PHP 内置的开发服务器运行 kodbox。进入 kodbox 文件夹：
+
+```
+cd kodbox
+```
+
+运行以下命令启动 PHP 内置服务器：
+
+```
+php -S 0.0.0.0:9100
+```
+
+在浏览器中访问你的 kodbox 服务器，如：http://localhost:9100 。第一次访问需要进行初始的配置。
+
+## wordpress
+
+> **WordPress** 是一个开源的内容管理系统（Content Management System，简称 CMS），用于创建和管理网站。它最初是一个博客发布平台，但随着功能的不断扩展，如今已经成为全球最流行的网站构建工具之一，可以用来构建各种类型的网站，包括博客、企业网站、电子商务网站、论坛、作品展示网站等。
+
+### 准备
+
+> 更新Termux并安装必要的软件包
+
+```
+pkg update && pkg upgrade
+pkg install php mariadb nodejs git curl wget
+```
+
+确保配置安装了**mariadb**、**php**
+
+### 下载
+
+下载WordPress
+
+```
+mkdir ~/app/
+cd ~/app/
+wget https://wordpress.org/latest.tar.gz
+tar -xzvf latest.tar.gz
+```
+
+解压完成后存在wordpress目录
+
+### 配置
+
+> 主要是进行数据库的配置
+
+```
+cp ~/app/wordpress/wp-config-sample.php ~/app/wordpress/wp-config.php
+vim ~/app/wordpress/wp-config.php
+```
+
+修改以下内容：
+
+```
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'root');
+define('DB_PASSWORD', '123456');
+define('DB_HOST', 'localhost');
+```
+
+### 启动
+
+运行以下命令启动 PHP 内置服务器：
+
+```
+php -S 0.0.0.0:9200
+```
+
+在浏览器中访问你的 wordpress，如：http://localhost:9200 。第一次访问需要进行初始的配置。
+
 ## rabbitmq
 
 ### 安装rabbitmq
@@ -810,15 +937,44 @@ chmod +x ~/.auto_startup/check_service.sh
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 LOG_DIR="$SCRIPT_DIR/log"
 mkdir -p "$LOG_DIR"
+KODBOX_DIR="$HOME/app/kodbox"
+KODBOX_PORT="${KODBOX_PORT:-9100}" # 如果未设置，使用默认端口
 
 # 定义服务数组
 SERVICES=(
     "sshd"
-    "mariadb"
-    "redis"
+    "mariadb:mariadbd-safe"
+    "redis:redis-server"
     "minio"
-    "rabbitmq"
+    "rabbitmq:rabbitmqctl"
+    "nginx"
+    "kodbox"
 )
+
+# 动态过滤已安装的服务
+filter_installed_services() {
+    FILTERED_SERVICES=()
+    for service in "${SERVICES[@]}"; do
+        name="${service%%:*}"
+        cmd="${service##*:}"
+
+        if [ "$name" == "kodbox" ]; then
+            # 检查 kodbox 的目录是否存在
+            if [ -d "$KODBOX_DIR" ]; then
+                FILTERED_SERVICES+=("$name")
+            fi
+        else
+            # 检查其他服务的命令是否存在
+            if command -v "$cmd" > /dev/null 2>&1; then
+                FILTERED_SERVICES+=("$name")
+            fi
+        fi
+    done
+    SERVICES=("${FILTERED_SERVICES[@]}")
+}
+
+# 调用过滤函数
+filter_installed_services
 
 # 启动服务的函数
 start_service() {
@@ -857,6 +1013,18 @@ start_service() {
                 rabbitmq-server -detached
             fi
             ;;
+        "nginx")
+            if ! pgrep "nginx" >/dev/null; then
+                echo "Starting nginx"
+                nginx
+            fi
+            ;;
+        "kodbox")
+            if ! pgrep -f "php -S 0.0.0.0:$KODBOX_PORT" >/dev/null; then
+                echo "Starting kodbox"
+                nohup php -S 0.0.0.0:$KODBOX_PORT -t "$KODBOX_DIR" > "$LOG_DIR/kodbox.log" 2>&1 &
+            fi
+            ;;
         *)
             echo "Unknown service: $1"
             ;;
@@ -874,12 +1042,10 @@ show_menu() {
 
     if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le "${#SERVICES[@]}" ]; then
         if [ "$choice" -eq 0 ]; then
-            # 启动所有服务
             for SERVICE in "${SERVICES[@]}"; do
                 start_service "$SERVICE"
             done
         else
-            # 启动指定序号的服务
             start_service "${SERVICES[$((choice - 1))]}"
         fi
     else
@@ -887,17 +1053,13 @@ show_menu() {
     fi
 }
 
-# 检查是否传入参数
 if [ "$#" -eq 0 ]; then
-    # 没有参数时，显示菜单
     show_menu
 elif [ "$1" == "all" ]; then
-    # 参数为 "all" 时，启动所有服务
     for SERVICE in "${SERVICES[@]}"; do
         start_service "$SERVICE"
     done
 else
-    # 有参数时，只启动指定的服务
     for SERVICE in "$@"; do
         start_service "$SERVICE"
     done
@@ -931,14 +1093,45 @@ sas all
 `stop_service.sh`用来停止各种服务
 
 ```bash
+#!/bin/bash
 
 # 定义服务数组
 SERVICES=(
-    "mariadb"
-    "redis"
+    "mariadb:mariadbd-safe"
+    "redis:redis-server"
     "minio"
-    "rabbitmq"
+    "rabbitmq:rabbitmqctl"
+    "kodbox"
+    "nginx"
 )
+
+# 动态过滤已安装的服务
+filter_installed_services() {
+    # 使用一个新数组来存储过滤后的服务名称
+    SERVICES=($(for service in "${SERVICES[@]}"; do
+        # 获取服务名称和命令
+        name="${service%%:*}"
+        cmd="${service##*:}"
+        # 如果没有提供命令，使用服务名作为命令
+        if [ -z "$cmd" ]; then
+            cmd="$name"
+        fi
+        
+        if [ "$cmd" == "kodbox" ]; then
+            # 检查 kodbox 的目录是否存在
+            if [ -d "$HOME/app/kodbox" ]; then
+               echo "$name"
+            fi
+        else
+            # 检查命令是否安装
+            command -v "$cmd" > /dev/null 2>&1 && echo "$name"
+        fi
+        
+    done))
+}
+
+# 调用过滤函数
+filter_installed_services
 
 # 停止服务的函数
 stop_service() {
@@ -991,6 +1184,30 @@ stop_service() {
                 echo "rabbitmq is not running"
             fi
             ;;
+        "nginx")
+            if pgrep "nginx" > /dev/null; then
+                echo "Stopping nginx"
+                nginx -s stop
+                sleep 1
+                if ! pgrep "nginx" > /dev/null; then
+                    echo "nginx is closed"
+                fi
+            else
+                echo "nginx is not running"
+            fi
+            ;;
+        "kodbox")
+            if pgrep -f "php -S.*${KODBOX_PORT:-9100}.*kodbox" >/dev/null; then
+                echo "Stopping kodbox"
+                kill -9 $(pgrep -f "php -S.*${KODBOX_PORT:-9100}.*kodbox")
+                sleep 1
+                if ! pgrep -f "php -S.*${KODBOX_PORT:-9100}.*kodbox" > /dev/null; then
+                    echo "kodbox is closed"
+                fi
+            else
+                echo "kodbox is not running"
+            fi
+            ;;
         *)
             echo "Unknown service: $1"
             ;;
@@ -999,7 +1216,12 @@ stop_service() {
 
 # 显示服务菜单
 show_menu() {
-    echo "Available services to stop:" 
+    if [ ${#SERVICES[@]} -eq 0 ]; then
+        echo "No installed services found. Exiting."
+        exit 0
+    fi
+
+    echo "Available services to stop:"
     for i in "${!SERVICES[@]}"; do
         echo "$((i + 1)). ${SERVICES[$i]}"
     done
@@ -1009,8 +1231,8 @@ show_menu() {
     if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le "${#SERVICES[@]}" ]; then
         if [ "$choice" -eq 0 ]; then
             # 停止所有服务
-            for SERVICE in "${SERVICES[@]}"; do
-                stop_service "$SERVICE"
+            for service in "${SERVICES[@]}"; do
+                stop_service "$service"
             done
         else
             # 停止指定序号的服务
@@ -1027,26 +1249,19 @@ if [ "$#" -eq 0 ]; then
     show_menu
 elif [ "$1" == "all" ]; then
     # 参数为 "all" 时，停止所有服务
-    for SERVICE in "${SERVICES[@]}"; do
-        stop_service "$SERVICE"
+    for service in "${SERVICES[@]}"; do
+        stop_service "$service"
     done
 else
     # 有参数时，只停止指定的服务
-    for SERVICE in "$@"; do
-        stop_service "$SERVICE"
+    for arg in "$@"; do
+        if [[ " ${SERVICES[*]} " == *" $arg "* ]]; then
+            stop_service "$arg"
+        else
+            echo "Service $arg not found in the defined list or not installed."
+        fi
     done
 fi
-​````
-
-使用方法：
-
-​```bash
-# 进入可选服务选项
-./stop_service.sh
-# 停止指定服务
-./stop_service.sh redis minio
-# 停止所有服务
-./stop_service.sh all
 ```
 
 如果为脚本配置了别名，可以直接使用别名启动服务，如在~/.alias中添加了[别名](#别名)：
@@ -1075,6 +1290,7 @@ SERVICES_PORTS=(
     "rabbitmq:5672,15672,25672"
     "redis:6379"
     "sshd:8022"
+    "kodbox:${KODBOX_PORT:-9100}"
 )
 
 # 从 nginx.conf 提取端口，过滤掉注释行
@@ -1123,6 +1339,10 @@ is_service_installed() {
             ;;
         "nginx")
             command -v nginx >/dev/null 2>&1
+            ;;
+        "kodbox")
+            # 检查 kodbox 目录是否存在
+            [ -d "$HOME/app/kodbox" ]
             ;;
         *)
             return 1
