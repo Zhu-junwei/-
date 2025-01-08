@@ -10,7 +10,16 @@
 ```shell
 rpm -qa|grep samba
 ```
-![](./img/20230327_213706.png)
+```
+[root@centos7 ~l# rpm -qa grep samba
+samba-libs-4.10.16-24.el7 9.x86 64
+samba-4.10.16-24.el7 9.x86 64
+samba-client-libs-4.10.16-24.el7 9.x86 64
+samba-common-tools-4.10.16-24.el7 9.x86 64
+samba-common-libs-4.10,16-24.el7 9.x86 64
+samba-common-4.10.16-24.el7 9.noarch
+[root@centos7 ~]#
+```
 
 ### 如果没有安装需要手动安装
 ```shell
@@ -24,7 +33,11 @@ smbd --version
 # 方法二
 rpm -qi samba
 ```
-![](./img/20230327_214327.png)
+
+```
+[root@centos7 ~]# smbd --version
+Version 4.10.16
+```
 
 ## 创建共享目录
 
@@ -150,8 +163,9 @@ lsof -iTCP -sTCP:LISTEN -n -P | grep smbd
 挂载
 ```shell
 mount -t cifs //192.168.234.128/MyShareName /root/128 -o defaults,username=user1,password=user1,port=22222
+# 查看挂载情况
+df -h
 ```
-![](./img/20230328_001018.png)
 
 卸载
 ```shell
