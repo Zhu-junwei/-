@@ -24,13 +24,13 @@ Resilio Sync 适合需要频繁在多个设备之间共享和同步大文件或�
 | 电影库                                              | BHK56Y75XCKI3M5CFEKVBVZ2X7F45AY7T | 500GB左右的不断更新的电影库           |
 | 漫画合集                                             | BRWDXO6UZQSTF6CDSL7N6QEYV3HZAS2X7 | 2.65TB                     |
 | 电子书支援计划精品书籍                                      | BGTI4IAWBEOQUJKLL5KR7YMXHT3EDLKJN | 30G                        |
-| 中华书局 中华经典名著全本全注全译（129套）                          | BSSQJU44HCQFKJ37POMRGS346XZRGAHKC | 缺少部分书籍，不定期更新               |
+| 中华书局 中华经典名著全本全注全译（129套）                          | BEDBIWWTDMET4L5C6USKULZM2TSPKFPYL | 缺少部分书籍，不定期更新               |
 | [书格](https://www.shuge.org/foryou/resilio_sync/) | BK6VORSOAPPEHB4D522QZERIZQETO3WY3 | 文件总大小超过 2.79T              |
 | 经济学人                                             | BYRRPM52YK6Z6TETDQITFXBV647XLCNIO |                            |
 | 英语双语书及世界名著原版书                                    | B3AYOKJJXVHSMXVVPVIS66YOBO4A4RKOA |                            |
 | RSS获取各种资源更新                                      | BF2C65RTUBLKQJQ5MYXVQRV2S7W7IKQG3 |                            |
 | 机械工业出版社电子书收集                                     | BV3LYKGVLANF4NFDKDQBTP2TB4IMJE7JB |                            |
-| IMDB前250位电影                                      | BZX3S6J4ULBGVD5SIZEZIT4ZANQV2OM2J |                            |
+| IMDB前250位电影                                      | BZX3S6J4ULBGVD5SIZEZIT4ZANQV2OM2J | 1.68T                      |
 | 美女套图                                             | BRRKENNNWITZ6O7N5SFNHDWMK67NGD37X |                            |
 | 电子书资源KEY                                         | B2YZTLQJYCRWAM4LJLWBZWH7EEYU25J3T |                            |
 | 经典日本漫画                                           | B3HGP7HANFMIYAGJHXEE7VPE5S6JYQQLI |                            |
