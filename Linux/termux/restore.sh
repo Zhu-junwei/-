@@ -5,7 +5,7 @@
 # 脚本描述：从备份文件中恢复 Termux 的 ./home 和 ./usr 目录。
 
 # 默认备份目录
-BACKUP_DIR="/sdcard/Download/termux-backup"
+BACKUP_DIR="/sdcard/Download"
 
 # 检查 Termux 是否具有存储权限
 check_storage_permission() {
