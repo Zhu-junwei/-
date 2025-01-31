@@ -29,10 +29,11 @@ check_storage_permission() {
 # 查找最新的备份文件
 find_latest_backup() {
     local latest_backup
-    latest_backup=$(ls -t "$BACKUP_DIR"/termux-backup-*.tar.gz 2>/dev/null | head -n 1)
+    # 使用 find 查找所有备份文件，并按修改时间排序
+    latest_backup=$(find "$BACKUP_DIR" -type f -name "termux-backup-*.tar.gz" -printf "%T@ %p\n" | sort -n | tail -n 1 | cut -d' ' -f2-)
 
     if [ -z "$latest_backup" ]; then
-        echo "Error: No backup files found in $BACKUP_DIR."
+        echo "Error: No backup files found in $BACKUP_DIR or its subdirectories."
         exit 1
     fi
 
