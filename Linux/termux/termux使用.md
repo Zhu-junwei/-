@@ -587,7 +587,7 @@ npm uninstall -g http-server
 
 ## kodbox
 
->  kodbox（一个轻量级文件管理器）
+> kodbox（一个轻量级文件管理器）
 
 ### 安装kodbox
 
@@ -630,7 +630,8 @@ php -S 0.0.0.0:9100
 
 ## wordpress
 
-> **WordPress** 是一个开源的内容管理系统（Content Management System，简称 CMS），用于创建和管理网站。它最初是一个博客发布平台，但随着功能的不断扩展，如今已经成为全球最流行的网站构建工具之一，可以用来构建各种类型的网站，包括博客、企业网站、电子商务网站、论坛、作品展示网站等。
+> **WordPress** 是一个开源的内容管理系统（Content Management System，简称
+> CMS），用于创建和管理网站。它最初是一个博客发布平台，但随着功能的不断扩展，如今已经成为全球最流行的网站构建工具之一，可以用来构建各种类型的网站，包括博客、企业网站、电子商务网站、论坛、作品展示网站等。
 
 ### 准备
 
@@ -807,13 +808,14 @@ rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
 
 ## Lazymux
 
-> [Lazymux]([Gameye98/Lazymux：termux 工具安装程序 --- Gameye98/Lazymux: termux tool installer](https://github.com/Gameye98/Lazymux)) 是一款帮助您在 Android 系统上轻松安装和使用多种渗透测试和黑客工具的工具。它允许用户轻松安装和使用各种流行的工具，例如Nmap、SQLMap和Metasploit。该工具使用起来很简单，因为您只需键入命令即可安装和使用任何工具。 Lazymux 是一个开源项目，对于渗透测试和道德黑客任务来说是一个非常有用的工具。
-
+> [Lazymux](https://github.com/Gameye98/Lazymux) 是一款帮助您在 Android
+> 系统上轻松安装和使用多种渗透测试和黑客工具的工具。它允许用户轻松安装和使用各种流行的工具，例如Nmap、SQLMap和Metasploit。该工具使用起来很简单，因为您只需键入命令即可安装和使用任何工具。
+> Lazymux 是一个开源项目，对于渗透测试和道德黑客任务来说是一个非常有用的工具。
 
 
 要求
 
-• Python 3.x 
+• Python 3.x
 
 ### 安装Lazymux
 
@@ -863,7 +865,44 @@ python lazymux.py
 lzmx > set_install 
 ```
 
+## anacron
 
+> anacron 是一个用于在类 Unix 系统上运行周期性任务的工具。它的设计目标是确保任务在指定的时间间隔内运行，即使系统没有一直开机。与
+> cron 不同，anacron 不依赖于系统持续运行，因此特别适合笔记本电脑或台式机等可能经常关机的设备。在termux中使用anacron可以实现定时任务的自动执行。
+
+### 安装anacron
+
+```
+pkg install anacron
+```
+
+### 配置anacron
+
+**anacron 的配置文件**
+
+`anacron` 的任务配置文件通常是 `/etc/anacrontab`，但用户可以指定自定义的配置文件。
+
+创建配置文件：
+```
+mkdir -p ~/.anacron
+touch ~/.anacron/anacrontab
+```
+
+配置文件示例：
+```
+# 格式：<天数> <延迟分钟> <任务名> <命令>
+1 5 backup ~/.backup/backup.sh
+```
+
+指定配置文件：
+
+```
+anacron -f ~/.anacron/anacrontab
+```
+
+在termux中，anacron的时间戳文件是`/data/data/com.termux/files/usr/var/spool/anacron`里面。
+
+使用案例：[自定义备份恢复脚本](#自定义备份恢复脚本)
 
 # 备份与恢复
 
@@ -910,6 +949,51 @@ termux-restore /sdcard/backup.tar.xz
 ```
 
 备份在重新安装termux时非常之有用！后悔之前不会备份~
+
+## 自定义备份恢复脚本
+
+参见：
+
+- [backup.sh](./backup.sh) `备份脚本`
+- [restore.sh](./restore.sh) `恢复脚本`
+
+### 备份脚本
+
+> 备份脚本会将 Termux 目录下的 `home` 和 `usr` 目录打包成 `tar.gz` 文件，并保存在`/sdcard/Download/termux-backup`
+> 目录中，默认保存最近的2次备份。
+
+```
+# 可以直接运行
+bash <(curl -sSL https://raw.githubusercontent.com/Zhu-junwei/notebook/master/Linux/termux/backup.sh)
+
+# 也可以下载到本地后运行
+mkdir ~/.backup
+cd .backup
+wget https://raw.githubusercontent.com/Zhu-junwei/notebook/master/Linux/termux/backup.sh
+chmod +x backup.sh
+./backup.sh
+```
+
+**可以结合anacron定时任务进行自动备份**：
+
+`~/.anacron/anacrontab`
+
+```
+# 格式：<天数> <延迟分钟> <任务名> <命令>
+2 1 backup  ~/.backup/backup.sh
+```
+
+> 这里设置的每两天备份一次文件。
+
+**设置anacron在termux开机时启动**：
+
+```
+anacron -s -t ~/.anacron/anacrontab
+```
+
+### 恢复脚本
+
+> 恢复脚本可以指定要恢复的备份文件，如果没有指定，则脚本从`/sdcard/Download/`目录中查找最近的备份文件，并恢复。
 
 # 常用运维
 

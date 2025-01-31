@@ -18,7 +18,7 @@ DATE=$(date +"%Y%m%d-%H%M")
 BACKUP_FILE="$BACKUP_DIR/termux-backup-$DATE.tar.gz"
 
 # 输出和错误日志重定向日志输出到文件
-exec &> backup.log
+exec &>> backup.log
 
 # 检查 Termux 是否具有存储权限
 echo "checking for storage permission."
@@ -68,11 +68,12 @@ if [ -n "$BACKUP_FILES" ]; then
     # 输出剩余的两个备份文件路径和大小到 backup-list 文件
     BACKUP_FILES=$(ls -t termux-backup-*.tar.gz)
 
+    cat /dev/null > "$BACKUP_LIST_FILE"
     for file in $BACKUP_FILES; do
         FILE_SIZE=$(du -h "$file" | awk '{print $1}')
         # 如果是最新备份文件，则前面加上 '*'
-        if [ "$file" == "$BACKUP_FILE" ]; then
-            echo "*$file | $FILE_SIZE" > "$BACKUP_LIST_FILE"
+        if [ "$file" == "$(basename "$BACKUP_FILE")" ]; then
+            echo "*$file | $FILE_SIZE" >> "$BACKUP_LIST_FILE"
         else
             echo " $file | $FILE_SIZE" >> "$BACKUP_LIST_FILE"
         fi
