@@ -21,7 +21,7 @@ dns=8.8.8.8;8.8.4.4;  # DNS服务器地址，用分号分隔
 
 重新加载 NetworkManager 的配置
 ```bash
-nmcli connection reload。
+nmcli connection reload
 ```
 
 重启网络接口以应用更改
