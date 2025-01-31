@@ -7,7 +7,8 @@
 # 备份存储目录以及保留的备份数量
 BACKUP_DIR="/sdcard/Download/termux-backup"
 SAVE_BACKUP_COUNT=2
-BACKUP_LIST_FILE="$(dirname "$0")/backup-list"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_LIST_FILE="$SCRIPT_DIR/backup-list"
 
 # 确保目录存在
 mkdir -p "$BACKUP_DIR"
@@ -38,12 +39,15 @@ else
 fi
 
 # 执行备份
+echo "Backing up $BACKUP_FILE..."
 if ! tar -zcf "$BACKUP_FILE" -C /data/data/com.termux/files \
 	--exclude=./home/.suroot \
 	--exclude=./usr/var/run/* \
 	./home ./usr; then
     	echo "Backup failed: $BACKUP_FILE"
 	exit 1
+else
+    echo "Backup successful: $BACKUP_FILE"
 fi
 
 # 只保留最近两个备份，删除旧的
