@@ -82,29 +82,36 @@ LANGUAGE=zh_CN.UTF-8
 # 设置服务的端口
 export KODBOX_PORT=9100
 
-# 获取设备名称
-device_name=$(getprop ro.product.marketname)
-if [ -z "$device_name" ]; then
-    device_name=$(getprop net.hostname)
+# 系统信息
+sysinfo() {
+    # 获取设备名称
+    device_name=$(getprop ro.product.marketname)
+    if [ -z "$device_name" ]; then
+        device_name=$(getprop net.hostname)
+    fi
+	echo "设备: $device_name [ $(uname -o) $(getprop ro.build.version.release) ]"
+	echo "欢迎: "$(whoami)
+	echo "时间:" `date "+%Y-%m-%d %H:%M"`
+	echo -en "IP  : \e[33m" && ifconfig | grep 'inet' | cut -d ' ' -f 10 | grep -v '127.0.0.1' | awk 'NR==1 {printf "%s\n", $0} NR>1 {printf "      %s\n", $0}' && echo -en "\e[0m"
+}
+sysinfo
+
+# termux启动时启动所有的服务
+if ! pgrep -x "sshd" >/dev/null; then
+	sas sshd
 fi
-
-# 打印登录信息
-echo "设备: $device_name"
-echo "欢迎: "$(whoami)
-echo "时间:" `date "+%Y-%m-%d %H:%M"`
-echo -e "IP  :\e[33m" `ifconfig|grep 'inet'|cut -d ' ' -f 10|grep -v '127.0.0.1'` "\e[0m"
-
-# 启动所有的服务
-sas all
 
 # 检查服务的运行状态
 # cs
 
 quikfind(){
-# Usage: quikfind
-read -p "Enter Filename: " filename
-find /sdcard/ | grep ${filename}
+	# Usage: quikfind
+	read -p "Enter Filename: " filename
+	find /sdcard/ | grep ${filename}
 }
+
+# 启动termux备份
+anacron -s -t ~/.anacron/anacrontab
 ```
 
 具体脚本情况查[常用运维](#运维脚本)章节
@@ -994,6 +1001,12 @@ anacron -s -t ~/.anacron/anacrontab
 ### 恢复脚本
 
 > 恢复脚本可以指定要恢复的备份文件，如果没有指定，则脚本从`/sdcard/Download/`目录中查找最近的备份文件，并恢复。
+
+```
+bash <(curl -sSL https://raw.githubusercontent.com/Zhu-junwei/notebook/master/Linux/termux/restore.sh)
+```
+
+
 
 # 常用运维
 
