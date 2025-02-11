@@ -103,9 +103,20 @@ alias grep='grep --color=auto'
 source ~/.bash_aliases
 ```
 
+# tasksel安装图形界面
+
+`tasksel` 是 Debian 和 Ubuntu 中的一个任务选择工具，用于批量安装一组相关的软件包，例如桌面环境、LAMP 服务器、SSH 服务器等。
+
+```
+sudo apt install tasksel
+sudo tasksel
+```
+
+
 # 软件系统更新
 
 换源：
+
 ```
 # 需要切换root用户
 bash <(curl -sSL https://linuxmirrors.cn/main.sh)
