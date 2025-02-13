@@ -115,38 +115,49 @@ sudo tasksel
 
 # 软件系统更新
 
-换源：
+## 换源
 
 ```
 # 需要切换root用户
+sudo su -
 bash <(curl -sSL https://linuxmirrors.cn/main.sh)
 ```
 
-查看使用的源：
+## 查看使用的源
 
 ```
 cat /etc/apt/sources.list
 ```
 
-可更新软件列表：
+## 可更新软件列
 
 ```
 sudo apt list --upgradeable
 ```
 
-更新所有软件：
+## 更新所有软件
 
 ```
 sudo apt upgrade
 ```
 
-更新指定的软件：
+## 更新指定的软件
 
 ```
 sudo apt install package_name
 ```
 
-清理无用的软件：
+## 卸载
+
+```
+# 仅卸载软件包
+sudo apt remove package_name
+
+# 卸载软件包，并删除配置文件
+sudo apt purge package_name
+```
+
+## 清理无用的软件
 
 ```
 sudo apt autoremove

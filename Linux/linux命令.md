@@ -455,8 +455,8 @@ sudo userdel -r test
 | usermod  | 修改用户账户字段，还可以指定主要组（ primary group）以及辅助组（ secondary group）的所属关系 |
 | passwd   | 修改已有用户的密码                                                     |
 | chpasswd | 从文件中读取登录名及密码并更新密码                                             |
-| chage    | 修改密码的过期                                                       |
-| chfn     | 日期修改用户账户的备注信息                                                 |
+| chage    | 修改密码的过期日期                                                     |
+| chfn     | 修改用户账户的备注信息                                                   |
 | chsh     | 修改用户账户的默认登录 shell                                             |
 
 #### usermod
@@ -501,13 +501,30 @@ sudo usermod -L user1
 sudo usermod -U user1
 ```
 
-#### passwd
+#### passwd和chpasswd
 
 修改用户密码，默认只能修改自己的密码，root用户可以修改所有人的密码。
 
 ```bash
 # 修改user1用户的密码
 passwd user1
+```
+
+`-e` **让一个账户的密码立即过期**。这可以强制一个用户下次登录时更改密码。你可以先给用户设置一个简单的密码，之后强
+制用户在下次登录时改成他们能记住的更复杂的密码。
+
+```
+# 可以先修改用户的密码，但这不是必须的
+sudo passwd user1
+# 强制用户登录的时候修改密码
+sudo passwd -e user1
+```
+
+**chpasswd**命令能从标准输入自动读取一系列以冒号分隔的登录名和密码对，自动对密码加密，然后为用户账户设置密码。你也可以用重定向命令将包含
+`username:password` 对的文件重定向给该命令
+
+```
+sudo chpasswd < users.txt
 ```
 
 ## 组管理
@@ -527,6 +544,11 @@ groups 用户名
 ```bash
 # 添加一个名叫shared
 sudo groupadd shared
+# 查看添加的组
+tail /etc/group
+
+# 修改组名
+sudo groupmod -n new_name old_name
 ```
 
 ### 将用户添加到某个组
@@ -1025,13 +1047,14 @@ vg1   2   1   0 wz--n- 29.99g    0
 ```
 
 如果逻辑卷已经挂载了，可以通过`resize2fs`命令来调整文件系统的大小：
+
 ```
 sudo resize2fs /dev/vg1/lv1
 ```
 
-
 #### 缩容逻辑卷
- ⚠️ `lvreduce` 命令用于 减少逻辑卷（LV） 的大小。这个命令可以用于释放磁盘空间，但必须小心使用，
+
+⚠️ `lvreduce` 命令用于 减少逻辑卷（LV） 的大小。这个命令可以用于释放磁盘空间，但必须小心使用，
 因为减少逻辑卷的大小可能会导致数据丢失。如果你没有正确备份数据或没有提前调整文件系统大小，
 可能会出现不可恢复的数据丢失。
 
@@ -1039,6 +1062,7 @@ sudo resize2fs /dev/vg1/lv1
 # 为逻辑卷 lv1 从卷组 vg1 中缩容 10G
 sudo lvreduce -L -10G /dev/vg1/lv1
 ```
+
 ```
 zjw@debian:~$ 
 zjw@debian:~$ sudo vgs
